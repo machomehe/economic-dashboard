@@ -1,0 +1,59 @@
+name: Fetch FRED Data
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # every 6 hours
+  workflow_dispatch:         # manual trigger
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch FRED data
+        env:
+          FRED_API_KEY: dd7096c0a98f837e593a75a4ae24721a
+        run: |
+          python3 << 'EOF'
+          import urllib.request, json, os
+
+          api_key = os.environ['FRED_API_KEY']
+          indicators = [
+            'FEDFUNDS', 'CPIAUCSL', 'UNRATE',
+            'A191RL1Q225SBEA', 'DGS10', 'DGS2',
+            'DTWEXBGS', 'DCOILWTICO'
+          ]
+
+          result = {}
+          for series_id in indicators:
+            url = (
+              f'https://api.stlouisfed.org/fred/series/observations'
+              f'?series_id={series_id}'
+              f'&api_key={api_key}'
+              f'&sort_order=desc'
+              f'&limit=13'
+              f'&file_type=json'
+            )
+            try:
+              with urllib.request.urlopen(url, timeout=10) as resp:
+                data = json.loads(resp.read())
+                result[series_id] = data.get('observations', [])
+            except Exception as e:
+              print(f'Error fetching {series_id}: {e}')
+              result[series_id] = []
+
+          with open('data.json', 'w') as f:
+            json.dump({'updated': __import__('datetime').datetime.utcnow().isoformat() + 'Z', 'data': result}, f)
+          print('data.json written')
+          EOF
+
+      - name: Commit data.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "Update economic data $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
