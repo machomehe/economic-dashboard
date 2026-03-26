@@ -17,16 +17,16 @@ h1{font-size:1.4rem;font-weight:700}
 .status-bar{display:flex;gap:12px;margin-bottom:16px;font-size:.75rem;flex-wrap:wrap}
 .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
 .dot-green{background:#3fb950}.dot-blue{background:#58a6ff}.dot-yellow{background:#d29922}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
 .card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px}
 .card.up{border-left:3px solid #3fb950}.card.down{border-left:3px solid #f85149}.card.neutral{border-left:3px solid #58a6ff}
 .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .card-title{font-size:.85rem;color:#8b949e;font-weight:500}.card-id{font-size:.7rem;color:#484f58}
 .card-value{font-size:1.6rem;font-weight:700;margin-bottom:4px}
-.card-change{font-size:.8rem;margin-bottom:12px;display:flex;align-items:center;gap:4px}
+.card-change{font-size:.8rem;margin-bottom:10px;display:flex;align-items:center;gap:4px}
 .change-up{color:#3fb950}.change-down{color:#f85149}.change-neutral{color:#8b949e}
 .error-msg{color:#f85149;font-size:.8rem;padding:8px 0}.loading-msg{color:#8b949e;font-size:.8rem;padding:8px 0}
-.chart-wrap{height:60px}canvas{max-width:100%}
+.chart-wrap{height:90px}canvas{max-width:100%}
 @media(max-width:480px){.grid{grid-template-columns:1fr}h1{font-size:1.2rem}}
 </style>
 </head>
@@ -84,7 +84,61 @@ function renderCard(ind,obs){
   const ctx=document.getElementById('chart-'+ind.id);if(!ctx)return;
   if(charts[ind.id])charts[ind.id].destroy();
   const color=diff>0?'#3fb950':diff<0?'#f85149':'#58a6ff';
-  charts[ind.id]=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{data:cd,borderColor:color,borderWidth:1.5,fill:true,backgroundColor:color+'22',pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:false}});
+  charts[ind.id]=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:lb,
+      datasets:[{
+        data:cd,
+        borderColor:color,
+        borderWidth:1.5,
+        fill:true,
+        backgroundColor:color+'18',
+        pointRadius:4,
+        pointHoverRadius:6,
+        pointBackgroundColor:color,
+        pointBorderColor:color,
+        tension:0
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          enabled:true,
+          callbacks:{
+            label:ctx=>` ${fmt(ctx.parsed.y,ind.unit)}`
+          }
+        }
+      },
+      scales:{
+        x:{
+          display:true,
+          ticks:{
+            color:'#484f58',
+            font:{size:9},
+            maxRotation:45,
+            minRotation:30,
+            maxTicksLimit:6
+          },
+          grid:{color:'#21262d'}
+        },
+        y:{
+          display:true,
+          position:'right',
+          ticks:{
+            color:'#484f58',
+            font:{size:9},
+            maxTicksLimit:4
+          },
+          grid:{color:'#21262d'}
+        }
+      },
+      animation:false
+    }
+  });
 }
 async function loadAll(){
   try{
