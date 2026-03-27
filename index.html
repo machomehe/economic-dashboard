@@ -10,8 +10,8 @@
 body{background:#ffffff;color:#1a1a1a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:16px;min-height:100vh}
 header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 h1{font-size:1.3rem;font-weight:700}
-.subtitle{font-size:.72rem;color:#888;margin-top:3px}
-.last-update{font-size:.7rem;color:#888;text-align:right}
+.subtitle{font-size:.72rem;color:#888888;margin-top:3px}
+.last-update{font-size:.7rem;color:#888888;text-align:right}
 .refresh-btn{background:#f0f0f0;border:1px solid #e0e0e0;color:#1a1a1a;padding:5px 11px;border-radius:6px;cursor:pointer;font-size:.78rem;margin-top:4px}
 .refresh-btn:hover{background:#e0e0e0}
 .status-bar{display:flex;gap:14px;margin-bottom:16px;font-size:.72rem;flex-wrap:wrap}
@@ -20,27 +20,23 @@ h1{font-size:1.3rem;font-weight:700}
 .section-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:7px 12px;border-radius:8px}
 .section-label{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px;letter-spacing:.5px}
 .section-title{font-size:.9rem;font-weight:600}
-.section-desc{font-size:.72rem;color:#888}
+.section-desc{font-size:.72rem;color:#888888}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
 .card{
   background:#ffffff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;
-  cursor:pointer;transition:background .15s;
+  cursor:pointer;transition:background .15s,border-color .15s;
   text-decoration:none;display:block;color:inherit;
 }
-.card:hover{background:#f5f5f5}
+.card:hover{background:#f5f5f5;border-color:#e67e2244}
+.card.pos{}.card.neg{}
 .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
 .card-name{font-size:.83rem;font-weight:600;color:#1a1a1a;line-height:1.3}
-.card-symbol{font-size:.65rem;color:#aaa;font-family:monospace;margin-top:2px}
+.card-symbol{font-size:.65rem;color:#aaaaaa;font-family:monospace;margin-top:2px}
 .card-value-row{display:flex;align-items:baseline;gap:8px;margin-bottom:3px}
 .card-value{font-size:1.5rem;font-weight:700}
-.card-latest-date{font-size:.65rem;color:#aaa}
+.card-latest-date{font-size:.65rem;color:#aaaaaa}
 .card-change{font-size:.77rem;margin-bottom:9px}
-/* 5단계 색상 */
-.sp{color:#27ae60}   /* 강한 긍정 — 초록 */
-.p{color:#8bc34a}    /* 긍정 — 연두 */
-.n{color:#9e9e9e}    /* 보통 — 회색 */
-.ng{color:#e67e22}   /* 부정 — 주황 */
-.sn{color:#e53935}   /* 강한 부정 — 빨강 */
+.red-chg{color:#27ae60}.blue-chg{color:#e67e22}.green-chg{color:#1a1a1a}.neutral-text{color:#888888}
 .chart-wrap{height:88px}canvas{max-width:100%}
 @media(max-width:600px){.grid{grid-template-columns:1fr 1fr}}
 @media(max-width:380px){.grid{grid-template-columns:1fr}}
@@ -58,133 +54,12 @@ h1{font-size:1.3rem;font-weight:700}
   </div>
 </header>
 <div class="status-bar">
-  <span id="statusDot"><span class="dot" style="background:#ccc"></span>데이터 로딩 중...</span>
-  <span><span class="dot" style="background:#9e9e9e"></span>출처: Federal Reserve Bank of St. Louis</span>
+  <span id="statusDot"><span class="dot" style="background:#d29922"></span>데이터 로딩 중...</span>
+  <span><span class="dot" style="background:#e67e22"></span>출처: Federal Reserve Bank of St. Louis</span>
 </div>
 <div id="dashboard"></div>
 
 <script>
-// ── 5단계 색상 ───────────────────────────────────────────────────────────────
-const C = {
-  sp: '#27ae60',  // 강한 긍정 (초록)
-  p:  '#8bc34a',  // 긍정 (연두)
-  n:  '#9e9e9e',  // 보통 (회색)
-  ng: '#e67e22',  // 부정 (주황)
-  sn: '#e53935',  // 강한 부정 (빨강)
-};
-
-// ── 지표별 분류 함수 ─────────────────────────────────────────────────────────
-// 절대값 기준 (반비례: 낮을수록 좋음)
-function lvlNeg(v, t) {
-  // t = [강긍정한계, 긍정한계, 중립한계, 부정한계]
-  if (v <= t[0]) return 'sp';
-  if (v <= t[1]) return 'p';
-  if (v <= t[2]) return 'n';
-  if (v <= t[3]) return 'ng';
-  return 'sn';
-}
-// 절대값 기준 (비례: 높을수록 좋음)
-function lvlPos(v, t) {
-  // t = [강부정한계, 부정한계, 중립한계, 긍정한계]
-  if (v <= t[0]) return 'sn';
-  if (v <= t[1]) return 'ng';
-  if (v <= t[2]) return 'n';
-  if (v <= t[3]) return 'p';
-  return 'sp';
-}
-
-function classify(id, value, diff, prev, valid) {
-  switch (id) {
-
-    // ── 수익률곡선 (T10Y2Y): 절대값 기준, 비례 ───────────────────────────────
-    // +1.5% 이상: 정상 확장 / +0.5~1.5: 안정 / 0~+0.5: 주의 / -0.5~0: 경고 / -0.5↓: 강한 침체신호
-    case 'T10Y2Y': return lvlPos(value, [-0.5, 0.0, 0.5, 1.5]);
-
-    // ── 정책금리 (FEDFUNDS): 절대값 기준, 반비례 ─────────────────────────────
-    // ≤1.5 완화 / 1.5~3.0 중립하단 / 3.0~4.5 중립 / 4.5~5.5 긴축 / 5.5↑ 강긴축
-    case 'FEDFUNDS': return lvlNeg(value, [1.5, 3.0, 4.5, 5.5]);
-
-    // ── 실질금리 10Y (DFII10): 절대값 기준, 반비례 ───────────────────────────
-    // ≤-0.5 매우완화 / -0.5~0.5 완화 / 0.5~1.5 중립 / 1.5~2.5 긴축 / 2.5↑ 강긴축
-    case 'DFII10': return lvlNeg(value, [-0.5, 0.5, 1.5, 2.5]);
-
-    // ── 국채금리 10Y (DGS10): 절대값 기준, 반비례 ────────────────────────────
-    // ≤2.0 매우낮음 / 2.0~3.5 낮음 / 3.5~4.5 중립 / 4.5~5.5 높음 / 5.5↑ 매우높음
-    case 'DGS10': return lvlNeg(value, [2.0, 3.5, 4.5, 5.5]);
-
-    // ── 실업률 (UNRATE): 절대값 기준, 반비례 ─────────────────────────────────
-    // ≤3.5 완전고용 / 3.5~4.5 양호 / 4.5~5.5 중립 / 5.5~7.0 우려 / 7.0↑ 위기
-    case 'UNRATE': return lvlNeg(value, [3.5, 4.5, 5.5, 7.0]);
-
-    // ── 하이일드 스프레드 (BAMLH0A0HYM2): 절대값 기준, 반비례 ───────────────
-    // ≤2.5 매우타이트(낙관) / 2.5~3.5 정상 / 3.5~5.0 경계 / 5.0~7.0 위험 / 7.0↑ 위기
-    case 'BAMLH0A0HYM2': return lvlNeg(value, [2.5, 3.5, 5.0, 7.0]);
-
-    // ── 기대인플레 10Y (T10YIE): 목표(2%) 근접도 기준 ───────────────────────
-    // 2% 목표에서의 거리: ≤0.3 완벽 / ≤0.7 양호 / ≤1.2 중립 / ≤2.0 우려 / 2.0↑ 위험
-    case 'T10YIE': {
-      const d = Math.abs(value - 2.0);
-      if (d <= 0.3) return 'sp';
-      if (d <= 0.7) return 'p';
-      if (d <= 1.2) return 'n';
-      if (d <= 2.0) return 'ng';
-      return 'sn';
-    }
-
-    // ── CPI (CPIAUCSL / CPILFESL): YoY 계산 후 절대값 기준, 반비례 ───────────
-    // YoY ≤2.0 안정 / 2.0~3.0 주의 / 3.0~4.0 부담 / 4.0~6.0 고물가 / 6.0↑ 인플레 위기
-    case 'CPIAUCSL':
-    case 'CPILFESL': {
-      if (valid && valid.length >= 13) {
-        const yearAgo = parseFloat(valid[12].value);
-        if (!isNaN(yearAgo) && yearAgo > 0) {
-          const yoy = (value / yearAgo - 1) * 100;
-          return lvlNeg(yoy, [2.0, 3.0, 4.0, 6.0]);
-        }
-      }
-      return diff === 0 ? 'n' : diff > 0 ? 'ng' : 'p';
-    }
-
-    // ── 내구재 주문 (DGORDER): 방향(MoM%) 기준, 비례 ────────────────────────
-    // MoM +3%↑ / +0~3% / -2~0% / -5~-2% / -5%↓
-    case 'DGORDER': {
-      if (!prev || prev === 0) return 'n';
-      const pct = (diff / prev) * 100;
-      if (pct > 3.0)  return 'sp';
-      if (pct > 0)    return 'p';
-      if (pct > -2.0) return 'n';
-      if (pct > -5.0) return 'ng';
-      return 'sn';
-    }
-
-    // ── 비농업고용 (PAYEMS): 방향(절대 증감, 천명) 기준, 비례 ────────────────
-    // +200k↑ / +50~200k / -50~+50k / -150~-50k / -150k↓
-    case 'PAYEMS': {
-      if (diff > 200)  return 'sp';
-      if (diff > 50)   return 'p';
-      if (diff > -50)  return 'n';
-      if (diff > -150) return 'ng';
-      return 'sn';
-    }
-
-    // ── 산업생산 (INDPRO): 방향(MoM%) 기준, 비례 ────────────────────────────
-    // +1%↑ / 0~+1% / -0.5~0% / -1.5~-0.5% / -1.5%↓
-    case 'INDPRO': {
-      if (!prev || prev === 0) return 'n';
-      const pct = (diff / prev) * 100;
-      if (pct > 1.0)  return 'sp';
-      if (pct > 0)    return 'p';
-      if (pct > -0.5) return 'n';
-      if (pct > -1.5) return 'ng';
-      return 'sn';
-    }
-
-    default:
-      return diff === null ? 'n' : diff === 0 ? 'n' : diff > 0 ? 'p' : 'ng';
-  }
-}
-
-// ── 그룹 정의 ────────────────────────────────────────────────────────────────
 const GROUPS = [
   {
     key:'L', label:'L', name:'유동성', desc:'Liquidity',
@@ -201,18 +76,18 @@ const GROUPS = [
     color:'#555555', bg:'rgba(0,0,0,0.04)',
     items:[
       {id:'DGORDER', name:'내구재 주문',  sub:'Durable Goods Orders',  unit:'',  rel:'pos'},
-      {id:'UNRATE',  name:'실업률',       sub:'Unemployment Rate',     unit:'%', rel:'neg'},
-      {id:'PAYEMS',  name:'비농업고용',   sub:'NFP (천명)',             unit:'',  rel:'pos'},
-      {id:'INDPRO',  name:'산업생산',     sub:'Industrial Production', unit:'',  rel:'pos'},
+      {id:'UNRATE', name:'실업률',     sub:'Unemployment Rate',     unit:'%', rel:'neg'},
+      {id:'PAYEMS', name:'비농업고용', sub:'NFP (천명)',              unit:'',  rel:'pos'},
+      {id:'INDPRO', name:'산업생산',   sub:'Industrial Production', unit:'',  rel:'pos'},
     ]
   },
   {
     key:'D', label:'D', name:'디스 인플레', desc:'Dis-inflation',
     color:'#555555', bg:'rgba(0,0,0,0.04)',
     items:[
-      {id:'CPILFESL', name:'코어 CPI',       sub:'Core CPI',            unit:'', rel:'neg'},
-      {id:'T10YIE',   name:'기대인플레 10Y',  sub:'Breakeven Inflation', unit:'%',rel:'neg'},
-      {id:'CPIAUCSL', name:'CPI',            sub:'Headline CPI',        unit:'', rel:'neg'},
+      {id:'CPILFESL', name:'코어 CPI',      sub:'Core CPI',            unit:'', rel:'neg'},
+      {id:'T10YIE',   name:'기대인플레 10Y', sub:'Breakeven Inflation', unit:'%',rel:'neg'},
+      {id:'CPIAUCSL', name:'CPI',           sub:'Headline CPI',        unit:'', rel:'neg'},
     ]
   },
   {
@@ -223,133 +98,17 @@ const GROUPS = [
     ]
   }
 ];
-
+const C_GREEN='#27ae60', C_ORANGE='#e67e22', C_BLACK='#1a1a1a';
 const charts = {};
 function fmtDate(d){const [y,m]=d.split('-');return parseInt(m)+'/'+y.slice(2);}
 function fmt(v,u){if(v===null||v===undefined||isNaN(parseFloat(v)))return 'N/A';const n=parseFloat(v);const s=Math.abs(n)>=1000?n.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2}):n.toFixed(2);return u==='$'?'$'+s:u==='%'?s+'%':s;}
-
-function buildCard(item){
-  const a=document.createElement('a');
-  a.className='card';
-  a.id='card-'+item.id;
-  a.href='https://fred.stlouisfed.org/series/'+item.id;
-  a.target='_blank';
-  a.rel='noopener noreferrer';
-  const badge=item.rel==='pos'?'비례':'반비례';
-  a.innerHTML=
-    '<div class="card-header">'+
-      '<div><div class="card-name">'+item.name+'</div>'+
-      '<div class="card-symbol">'+item.id+' · '+item.sub+'</div></div>'+
-      '<span style="font-size:.62rem;color:#aaa;white-space:nowrap;padding-top:2px">'+badge+'</span>'+
-    '</div>'+
-    '<div class="card-value-row">'+
-      '<div class="card-value" id="val-'+item.id+'"><span style="color:#aaa;font-size:.8rem">—</span></div>'+
-      '<div class="card-latest-date" id="date-'+item.id+'"></div>'+
-    '</div>'+
-    '<div class="card-change" id="chg-'+item.id+'"></div>'+
-    '<div class="chart-wrap"><canvas id="chart-'+item.id+'"></canvas></div>';
-  return a;
-}
-
-function renderCard(item, obs) {
-  const card  = document.getElementById('card-'+item.id);
-  const valEl = document.getElementById('val-'+item.id);
-  const dateEl= document.getElementById('date-'+item.id);
-  const chgEl = document.getElementById('chg-'+item.id);
-
-  const valid = (obs||[]).filter(d => d.value !== '.' && !isNaN(parseFloat(d.value)));
-  if (!valid.length) { valEl.innerHTML='<span style="color:#aaa;font-size:.8rem">데이터 없음</span>'; return; }
-
-  const latest = parseFloat(valid[0].value);
-  const prev   = valid.length > 1 ? parseFloat(valid[1].value) : null;
-  const diff   = prev !== null ? latest - prev : null;
-
-  // 5단계 분류
-  const key   = classify(item.id, latest, diff, prev, valid);
-  const color = C[key];
-
-  // 값 표시 (색상 적용)
-  valEl.textContent  = fmt(latest, item.unit);
-  valEl.style.color  = color;
-  dateEl.textContent = fmtDate(valid[0].date);
-
-  // 변화량 표시
-  if (diff !== null) {
-    const arrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '→';
-    chgEl.innerHTML = '<span class="'+key+'">'+arrow+' '+(diff>0?'+':'')+diff.toFixed(2)+item.unit+' 전기 대비</span>';
-  }
-
-  // 차트
-  const cd  = valid.slice(0, 13).reverse().map(d => parseFloat(d.value));
-  const lb  = valid.slice(0, 13).reverse().map(d => fmtDate(d.date));
-  const ctx = document.getElementById('chart-'+item.id);
-  if (!ctx) return;
-  if (charts[item.id]) charts[item.id].destroy();
-  charts[item.id] = new Chart(ctx, {
-    type: 'line',
-    data: { labels: lb, datasets: [{
-      data: cd, borderColor: color, borderWidth: 1.5,
-      fill: true, backgroundColor: color+'18',
-      pointRadius: 3, pointHoverRadius: 5, pointBackgroundColor: color, tension: 0
-    }]},
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: {display:false}, tooltip: {enabled:true, callbacks:{
-        title: items => items[0].label,
-        label: c => ' '+fmt(c.parsed.y, item.unit)
-      }}},
-      scales: {
-        x: { display:true, ticks:{color:'#aaa',font:{size:8},maxRotation:45,minRotation:30,
-          callback: function(val,idx,ticks){
-            const label=this.getLabelForValue(val);
-            if(!label)return null;
-            if(idx===ticks.length-1)return label;
-            const month=parseInt(label.split('/')[0]);
-            return(month===1||month===4||month===7||month===10)?label:null;
-          }}, grid:{color:'#eeeeee'}},
-        y: { display:true, position:'right', ticks:{color:'#aaa',font:{size:8},maxTicksLimit:3}, grid:{color:'#eeeeee'}}
-      },
-      animation: false
-    }
-  });
-}
-
-function buildDashboard() {
-  const dash = document.getElementById('dashboard');
-  GROUPS.forEach(g => {
-    const sec = document.createElement('div');
-    sec.className = 'section';
-    sec.innerHTML =
-      '<div class="section-header" style="background:'+g.bg+';border-left:3px solid '+g.color+'">'+
-        '<span class="section-label" style="background:'+g.color+';color:#fff">'+g.label+'</span>'+
-        '<span class="section-title">'+g.name+'</span>'+
-        '<span class="section-desc">· '+g.desc+'</span>'+
-      '</div>'+
-      '<div class="grid" id="grid-'+g.key+'"></div>';
-    dash.appendChild(sec);
-    const grid = sec.querySelector('#grid-'+g.key);
-    g.items.forEach(item => grid.appendChild(buildCard(item)));
-  });
-}
-
-async function loadAll() {
-  try {
-    const r = await fetch('data.json?t='+Date.now());
-    if (!r.ok) throw new Error('data.json HTTP '+r.status);
-    const j = await r.json();
-    GROUPS.forEach(g => g.items.forEach(item => renderCard(item, j.data[item.id]||[])));
-    const upd = j.updated ? new Date(j.updated).toLocaleString('ko-KR') : '알 수 없음';
-    document.getElementById('lastUpdate').textContent = '데이터 기준: '+upd;
-    document.getElementById('statusDot').innerHTML = '<span class="dot" style="background:#27ae60"></span>FRED 연결됨';
-  } catch(e) {
-    document.getElementById('lastUpdate').textContent = '⚠ '+e.message;
-    document.getElementById('statusDot').innerHTML = '<span class="dot" style="background:#e53935"></span>오류';
-    console.error(e);
-  }
-}
-
+function buildCard(item){const a=document.createElement('a');a.className='card '+item.rel;a.id='card-'+item.id;a.href='https://fred.stlouisfed.org/series/'+item.id;a.target='_blank';a.rel='noopener noreferrer';const badge=item.rel==='pos'?'비례':'반비례';a.innerHTML='<div class="card-header"><div><div class="card-name">'+item.name+'</div><div class="card-symbol">'+item.id+' · '+item.sub+'</div></div><span style="font-size:.62rem;color:#aaaaaa;white-space:nowrap;padding-top:2px">'+badge+'</span></div><div class="card-value-row"><div class="card-value" id="val-'+item.id+'"><span style="color:#aaaaaa;font-size:.8rem">—</span></div><div class="card-latest-date" id="date-'+item.id+'"></div></div><div class="card-change" id="chg-'+item.id+'"></div><div class="chart-wrap"><canvas id="chart-'+item.id+'"></canvas></div>';return a;}
+function renderCard(item,obs){const card=document.getElementById('card-'+item.id);const valEl=document.getElementById('val-'+item.id);const dateEl=document.getElementById('date-'+item.id);const chgEl=document.getElementById('chg-'+item.id);const valid=(obs||[]).filter(d=>d.value!=='.'&&!isNaN(parseFloat(d.value)));if(!valid.length){valEl.innerHTML='<span style="color:#aaaaaa;font-size:.8rem">데이터 없음</span>';return;}const latest=parseFloat(valid[0].value);const prev=valid.length>1?parseFloat(valid[1].value):null;const diff=prev!==null?latest-prev:null;valEl.textContent=fmt(latest,item.unit);dateEl.textContent=fmtDate(valid[0].date);let dynColor=C_BLACK;if(diff!==null){const cls=diff===0?'green-chg':item.rel==='pos'?(diff>0?'red-chg':'blue-chg'):(diff>0?'blue-chg':'red-chg');dynColor=diff===0?C_BLACK:item.rel==='pos'?(diff>0?C_GREEN:C_ORANGE):(diff>0?C_ORANGE:C_GREEN);const arrow=diff>0?'▲':diff<0?'▼':'→';chgEl.innerHTML='<span class="'+cls+'">'+arrow+' '+(diff>0?'+':'')+diff.toFixed(2)+item.unit+' 전기 대비</span>';}const cd=valid.slice(0,13).reverse().map(d=>parseFloat(d.value));const lb=valid.slice(0,13).reverse().map(d=>fmtDate(d.date));const ctx=document.getElementById('chart-'+item.id);if(!ctx)return;if(charts[item.id])charts[item.id].destroy();charts[item.id]=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{data:cd,borderColor:dynColor,borderWidth:1.5,fill:true,backgroundColor:dynColor+'18',pointRadius:3,pointHoverRadius:5,pointBackgroundColor:dynColor,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:(items)=>items[0].label,label:(c)=>' '+fmt(c.parsed.y,item.unit)}}},scales:{x:{display:true,ticks:{color:'#aaaaaa',font:{size:8},maxRotation:45,minRotation:30,callback:function(val,idx,ticks){const label=this.getLabelForValue(val);if(!label)return null;if(idx===ticks.length-1)return label;const month=parseInt(label.split('/')[0]);return(month===1||month===4||month===7||month===10)?label:null;}},grid:{color:'#eeeeee'}},y:{display:true,position:'right',ticks:{color:'#aaaaaa',font:{size:8},maxTicksLimit:3},grid:{color:'#eeeeee'}}},animation:false}});}
+function buildDashboard(){const dash=document.getElementById('dashboard');GROUPS.forEach(g=>{const sec=document.createElement('div');sec.className='section';sec.innerHTML='<div class="section-header" style="background:'+g.bg+';border-left:3px solid '+g.color+'"><span class="section-label" style="background:'+g.color+';color:#ffffff">'+g.label+'</span><span class="section-title">'+g.name+'</span><span class="section-desc">· '+g.desc+'</span></div><div class="grid" id="grid-'+g.key+'"></div>';dash.appendChild(sec);const grid=sec.querySelector('#grid-'+g.key);g.items.forEach(item=>grid.appendChild(buildCard(item)));});}
+async function loadAll(){try{const r=await fetch('data.json?t='+Date.now());if(!r.ok)throw new Error('data.json HTTP '+r.status);const j=await r.json();GROUPS.forEach(g=>g.items.forEach(item=>renderCard(item,j.data[item.id]||[])));const upd=j.updated?new Date(j.updated).toLocaleString('ko-KR'):'알 수 없음';document.getElementById('lastUpdate').textContent='데이터 기준: '+upd;document.getElementById('statusDot').innerHTML='<span class="dot" style="background:#27ae60"></span>FRED 연결됨';}catch(e){document.getElementById('lastUpdate').textContent='⚠ '+e.message;document.getElementById('statusDot').innerHTML='<span class="dot" style="background:#e67e22"></span>오류';console.error(e);}}
 buildDashboard();
 loadAll();
 </script>
 </body>
 </html>
+
