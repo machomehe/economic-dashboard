@@ -7,14 +7,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#f8f8f8;color:#1a1a1a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
-nav{background:#fff;border-bottom:1px solid #e0e0e0;padding:0 16px;display:flex;align-items:center;gap:4px;position:sticky;top:0;z-index:100}
-.nav-btn{padding:12px 20px;font-size:.85rem;font-weight:600;border:none;background:none;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-1px}
-.nav-btn.active{color:#1a1a1a;border-bottom:2px solid #1a1a1a}
-.nav-btn:hover:not(.active){color:#555}
-.page{padding:16px;display:none}
-.page.active{display:block}
-.dash-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+body{background:#f8f8f8;color:#1a1a1a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:16px;min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 h1{font-size:1.3rem;font-weight:700}
 .subtitle{font-size:.72rem;color:#888;margin-top:3px}
 .last-update{font-size:.7rem;color:#888;text-align:right}
@@ -28,42 +22,46 @@ h1{font-size:1.3rem;font-weight:700}
 .section-title{font-size:.9rem;font-weight:600}
 .section-desc{font-size:.72rem;color:#888}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-.card{background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;cursor:pointer;transition:background .15s;text-decoration:none;display:block;color:inherit}
-.card:hover{background:#f5f5f5}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;text-decoration:none;display:block;color:inherit;position:relative}
 .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
 .card-name{font-size:.83rem;font-weight:600;color:#1a1a1a;line-height:1.3}
 .card-symbol{font-size:.65rem;color:#aaa;font-family:monospace;margin-top:2px}
+.card-meta{display:flex;align-items:center;gap:6px;flex-shrink:0;padding-top:1px}
+.badge{font-size:.6rem;color:#ccc;white-space:nowrap}
+.gear-btn{background:none;border:none;cursor:pointer;font-size:.85rem;color:#ccc;padding:0 0 0 2px;line-height:1;transition:color .15s}
+.gear-btn:hover{color:#555}
 .card-value-row{display:flex;align-items:baseline;gap:8px;margin-bottom:3px}
 .card-value{font-size:1.5rem;font-weight:700}
 .card-latest-date{font-size:.65rem;color:#aaa}
 .card-change{font-size:.77rem;margin-bottom:9px}
 .sp{color:#27ae60}.p{color:#8bc34a}.n{color:#9e9e9e}.ng{color:#e67e22}.sn{color:#e53935}
 .chart-wrap{height:88px}canvas{max-width:100%}
-.settings-title{font-size:1.1rem;font-weight:700;margin-bottom:4px}
-.settings-desc{font-size:.78rem;color:#888;margin-bottom:16px}
-.legend-bar{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;font-size:.72rem;background:#fff;padding:10px 14px;border-radius:8px;border:1px solid #e0e0e0}
-.legend-item{display:flex;align-items:center;gap:4px}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.set-section{background:#fff;border:1px solid #e0e0e0;border-radius:10px;margin-bottom:16px;overflow:hidden}
-.set-section-head{padding:10px 16px;background:rgba(0,0,0,0.03);border-bottom:1px solid #e8e8e8;display:flex;align-items:center;gap:8px}
-.set-section-label{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px;background:#555;color:#fff}
-.set-section-name{font-size:.88rem;font-weight:600}
-.ind-row{padding:14px 16px;border-bottom:1px solid #f0f0f0}
-.ind-row:last-child{border-bottom:none}
-.ind-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px}
-.ind-name{font-size:.85rem;font-weight:600}
-.ind-meta{display:flex;gap:6px;align-items:center}
-.mode-badge{font-size:.65rem;color:#888;background:#f0f0f0;padding:2px 7px;border-radius:10px}
-.reset-btn{font-size:.65rem;color:#aaa;background:none;border:1px solid #ddd;padding:2px 8px;border-radius:6px;cursor:pointer}
-.reset-btn:hover{background:#f5f5f5;color:#555}
-.th-editor{display:flex;align-items:flex-end;gap:2px;overflow-x:auto;padding-bottom:4px}
-.th-zone{display:flex;flex-direction:column;align-items:center;gap:3px}
-.th-zone-bar{width:40px;height:12px;border-radius:3px}
-.th-zone-lbl{font-size:.6rem;font-weight:600;white-space:nowrap}
-.th-between{display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 3px}
-.th-input{width:56px;padding:4px 4px;border:1px solid #ddd;border-radius:5px;font-size:.72rem;text-align:center;color:#333}
+
+/* ── 모달 ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:20px;width:min(480px,92vw);max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.modal-title{font-size:1rem;font-weight:700}
+.modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:#aaa;line-height:1;padding:0}
+.modal-close:hover{color:#333}
+.modal-sub{font-size:.72rem;color:#888;margin-bottom:16px}
+.modal-desc{font-size:.72rem;color:#555;background:#f8f8f8;padding:8px 10px;border-radius:7px;margin-bottom:16px;line-height:1.5}
+.legend-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;font-size:.68rem}
+.leg-item{display:flex;align-items:center;gap:3px}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.th-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.th-field{display:flex;flex-direction:column;gap:4px}
+.th-label{font-size:.68rem;font-weight:600;display:flex;align-items:center;gap:5px}
+.th-color-bar{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.th-input{padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:.82rem;color:#333;width:100%}
 .th-input:focus{outline:none;border-color:#888}
-.th-unit-lbl{font-size:.58rem;color:#bbb;text-align:center}
+.th-hint{font-size:.62rem;color:#aaa}
+.modal-actions{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;padding-top:14px}
+.btn-reset{font-size:.75rem;color:#aaa;background:none;border:1px solid #e0e0e0;padding:6px 14px;border-radius:6px;cursor:pointer}
+.btn-reset:hover{background:#f5f5f5;color:#555}
+.btn-apply{font-size:.78rem;font-weight:600;color:#fff;background:#1a1a1a;border:none;padding:7px 20px;border-radius:6px;cursor:pointer}
+.btn-apply:hover{background:#333}
 .save-toast{position:fixed;bottom:20px;right:20px;background:#1a1a1a;color:#fff;padding:8px 16px;border-radius:8px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
 .save-toast.show{opacity:1}
 @media(max-width:600px){.grid{grid-template-columns:1fr 1fr}}
@@ -71,66 +69,74 @@ h1{font-size:1.3rem;font-weight:700}
 </style>
 </head>
 <body>
-<nav>
-  <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">대시보드</button>
-  <button class="nav-btn" id="nav-settings" onclick="showPage('settings')">경제지표</button>
-</nav>
-
-<div class="page active" id="page-dashboard">
-  <div class="dash-header">
-    <div><h1>📊 경제지표 대시보드</h1>
-    <div class="subtitle">Federal Reserve Economic Data (FRED) — 미국 주요 경제지표</div></div>
-    <div><div class="last-update" id="lastUpdate">로딩 중...</div>
-    <button class="refresh-btn" onclick="reloadDash()">↻ 새로고침</button></div>
-  </div>
-  <div class="status-bar">
-    <span id="statusDot"><span class="dot" style="background:#ccc"></span>데이터 로딩 중...</span>
-    <span><span class="dot" style="background:#9e9e9e"></span>출처: FRED</span>
-  </div>
-  <div id="dashboard"></div>
+<header>
+  <div><h1>📊 경제지표 대시보드</h1>
+  <div class="subtitle">Federal Reserve Economic Data (FRED) — 미국 주요 경제지표</div></div>
+  <div><div class="last-update" id="lastUpdate">로딩 중...</div>
+  <button class="refresh-btn" onclick="reloadDash()">↻ 새로고침</button></div>
+</header>
+<div class="status-bar">
+  <span id="statusDot"><span class="dot" style="background:#ccc"></span>데이터 로딩 중...</span>
+  <span><span class="dot" style="background:#9e9e9e"></span>출처: FRED</span>
 </div>
+<div id="dashboard"></div>
 
-<div class="page" id="page-settings">
-  <div class="settings-title">⚙️ 경제지표 기준값 설정</div>
-  <div class="settings-desc">각 지표의 색상 경계값을 입력하세요. 변경 즉시 대시보드에 반영됩니다.</div>
-  <div class="legend-bar">
-    <span style="font-size:.72rem;color:#555;font-weight:600;margin-right:2px">색상:</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#27ae60"></span>강긍정(초록)</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#8bc34a"></span>긍정(연두)</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#9e9e9e"></span>중립(회색)</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#e67e22"></span>부정(주황)</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#e53935"></span>강부정(빨강)</span>
+<!-- 설정 모달 -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">지표 설정</div>
+      <button class="modal-close" onclick="closeModalDirect()">×</button>
+    </div>
+    <div class="modal-sub" id="modalSub"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <div class="legend-row">
+      <span class="leg-item"><span class="leg-dot" style="background:#27ae60"></span>강긍정</span>
+      <span class="leg-item"><span class="leg-dot" style="background:#8bc34a"></span>긍정</span>
+      <span class="leg-item"><span class="leg-dot" style="background:#9e9e9e"></span>중립</span>
+      <span class="leg-item"><span class="leg-dot" style="background:#e67e22"></span>부정</span>
+      <span class="leg-item"><span class="leg-dot" style="background:#e53935"></span>강부정</span>
+    </div>
+    <div class="th-grid" id="modalFields"></div>
+    <div class="modal-actions">
+      <button class="btn-reset" id="btnReset">기본값으로 초기화</button>
+      <button class="btn-apply" onclick="applyModal()">적용</button>
+    </div>
   </div>
-  <div id="settings-body"></div>
 </div>
 
 <div class="save-toast" id="toast">✓ 저장됨</div>
 
 <script>
+// ══════════════════════════════════════════════════════════════════
+// 기본 기준값
+// ══════════════════════════════════════════════════════════════════
 const DEFAULT_T={
-  FEDFUNDS:    {mode:'level_neg',t:[1.5,3.0,4.5,5.5],   unit:'%',   label:'정책금리',         desc:'절대값 — 낮을수록 완화적'},
-  DFII10:      {mode:'level_neg',t:[-0.5,0.5,1.5,2.5],  unit:'%',   label:'실질금리 10Y',     desc:'절대값 — 낮을수록 완화적'},
-  DGS10:       {mode:'level_neg',t:[2.0,3.5,4.5,5.5],   unit:'%',   label:'국채금리 10Y',     desc:'절대값 — 낮을수록 완화적'},
-  T10Y2Y:      {mode:'level_pos',t:[-0.5,0.0,0.5,1.5],  unit:'%',   label:'수익률곡선',       desc:'절대값 — 높을수록 정상'},
-  DGORDER:     {mode:'dir_pos',  t:[-5.0,-2.0,0.0,3.0], unit:'MoM%',label:'내구재 주문',      desc:'전월比% — 높을수록 긍정'},
-  UNRATE:      {mode:'level_neg',t:[3.5,4.5,5.5,7.0],   unit:'%',   label:'실업률',           desc:'절대값 — 낮을수록 건전'},
-  PAYEMS:      {mode:'dir_pos',  t:[-150,-50,50,200],    unit:'천명',label:'비농업고용',       desc:'전월 증감 — 높을수록 긍정'},
-  INDPRO:      {mode:'dir_pos',  t:[-1.5,-0.5,0.0,1.0], unit:'MoM%',label:'산업생산',         desc:'전월比% — 높을수록 긍정'},
-  CPILFESL:    {mode:'yoy_neg',  t:[2.0,3.0,4.0,6.0],   unit:'YoY%',label:'코어 CPI',         desc:'전년比% — 낮을수록 안정'},
-  T10YIE:      {mode:'target',   t:[0.3,0.7,1.2,2.0],   unit:'거리',label:'기대인플레 10Y',   desc:'목표(2%)와의 거리 — 가까울수록 좋음'},
-  CPIAUCSL:    {mode:'yoy_neg',  t:[2.0,3.0,4.0,6.0],   unit:'YoY%',label:'CPI',              desc:'전년比% — 낮을수록 안정'},
-  BAMLH0A0HYM2:{mode:'level_neg',t:[2.5,3.5,5.0,7.0],   unit:'%p',  label:'하이일드 스프레드',desc:'절대값 — 낮을수록 안정'},
+  FEDFUNDS:    {mode:'level_neg',t:[1.5,3.0,4.5,5.5],   unit:'%',   label:'정책금리',         desc:'절대값 기준, 낮을수록 완화적\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
+  DFII10:      {mode:'level_neg',t:[-0.5,0.5,1.5,2.5],  unit:'%',   label:'실질금리 10Y',     desc:'절대값 기준, 낮을수록 완화적\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
+  DGS10:       {mode:'level_neg',t:[2.0,3.5,4.5,5.5],   unit:'%',   label:'국채금리 10Y',     desc:'절대값 기준, 낮을수록 완화적\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
+  T10Y2Y:      {mode:'level_pos',t:[-0.5,0.0,0.5,1.5],  unit:'%',   label:'수익률곡선',       desc:'절대값 기준, 높을수록 정상\n강부정 < 경계1 ≤ 부정 < 경계2 ≤ 중립 < 경계3 ≤ 긍정 < 경계4 ≤ 강긍정'},
+  DGORDER:     {mode:'dir_pos',  t:[-5.0,-2.0,0.0,3.0], unit:'MoM%',label:'내구재 주문',      desc:'전월 대비 변화율(%), 높을수록 긍정\n강부정 < 경계1 ≤ 부정 < 경계2 ≤ 중립 < 경계3 ≤ 긍정 < 경계4 ≤ 강긍정'},
+  UNRATE:      {mode:'level_neg',t:[3.5,4.5,5.5,7.0],   unit:'%',   label:'실업률',           desc:'절대값 기준, 낮을수록 건전\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
+  PAYEMS:      {mode:'dir_pos',  t:[-150,-50,50,200],    unit:'천명',label:'비농업고용',       desc:'전월 대비 증감(천명), 높을수록 긍정\n강부정 < 경계1 ≤ 부정 < 경계2 ≤ 중립 < 경계3 ≤ 긍정 < 경계4 ≤ 강긍정'},
+  INDPRO:      {mode:'dir_pos',  t:[-1.5,-0.5,0.0,1.0], unit:'MoM%',label:'산업생산',         desc:'전월 대비 변화율(%), 높을수록 긍정\n강부정 < 경계1 ≤ 부정 < 경계2 ≤ 중립 < 경계3 ≤ 긍정 < 경계4 ≤ 강긍정'},
+  CPILFESL:    {mode:'yoy_neg',  t:[2.0,3.0,4.0,6.0],   unit:'YoY%',label:'코어 CPI',         desc:'전년 대비 변화율(%), 낮을수록 안정\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
+  T10YIE:      {mode:'target',   t:[0.3,0.7,1.2,2.0],   unit:'거리',label:'기대인플레 10Y',   desc:'목표(2%)와의 거리, 가까울수록 좋음\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
+  CPIAUCSL:    {mode:'yoy_neg',  t:[2.0,3.0,4.0,6.0],   unit:'YoY%',label:'CPI',              desc:'전년 대비 변화율(%), 낮을수록 안정\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
+  BAMLH0A0HYM2:{mode:'level_neg',t:[2.5,3.5,5.0,7.0],   unit:'%p',  label:'하이일드 스프레드',desc:'절대값 기준, 낮을수록 안정\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
 };
 
 function loadT(){
   try{const s=JSON.parse(localStorage.getItem('eco_t')||'{}');const m={};
     for(const id in DEFAULT_T)m[id]=s[id]?{...DEFAULT_T[id],t:[...s[id].t]}:{...DEFAULT_T[id],t:[...DEFAULT_T[id].t]};
-    return m;}catch(e){return Object.fromEntries(Object.entries(DEFAULT_T).map(([k,v])=>[k,{...v,t:[...v.t]}]));}
+    return m;}
+  catch(e){return Object.fromEntries(Object.entries(DEFAULT_T).map(([k,v])=>[k,{...v,t:[...v.t]}]));}
 }
 function saveT(){const o={};for(const id in T)o[id]={t:[...T[id].t]};localStorage.setItem('eco_t',JSON.stringify(o));}
 let T=loadT();
 
 const C={sp:'#27ae60',p:'#8bc34a',n:'#9e9e9e',ng:'#e67e22',sn:'#e53935'};
+
 function classify(id,value,diff,prev,valid){
   const cfg=T[id];if(!cfg)return'n';
   const[t0,t1,t2,t3]=cfg.t;
@@ -175,7 +181,17 @@ function buildCard(item){
   const a=document.createElement('a');a.className='card';a.id='card-'+item.id;
   a.href='https://fred.stlouisfed.org/series/'+item.id;a.target='_blank';a.rel='noopener noreferrer';
   const badge=item.rel==='pos'?'비례':'반비례';
-  a.innerHTML='<div class="card-header"><div><div class="card-name">'+item.name+'</div><div class="card-symbol">'+item.id+' · '+item.sub+'</div></div><span style="font-size:.62rem;color:#aaa;white-space:nowrap;padding-top:2px">'+badge+'</span></div><div class="card-value-row"><div class="card-value" id="val-'+item.id+'"><span style="color:#aaa;font-size:.8rem">—</span></div><div class="card-latest-date" id="date-'+item.id+'"></div></div><div class="card-change" id="chg-'+item.id+'"></div><div class="chart-wrap"><canvas id="chart-'+item.id+'"></canvas></div>';
+  a.innerHTML=
+    '<div class="card-header">'+
+      '<div><div class="card-name">'+item.name+'</div><div class="card-symbol">'+item.id+' · '+item.sub+'</div></div>'+
+      '<div class="card-meta">'+
+        '<span class="badge">'+badge+'</span>'+
+        '<button class="gear-btn" title="기준값 설정" onclick="openModal(event,\''+item.id+'\')">⚙︎</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card-value-row"><div class="card-value" id="val-'+item.id+'"><span style="color:#aaa;font-size:.8rem">—</span></div><div class="card-latest-date" id="date-'+item.id+'"></div></div>'+
+    '<div class="card-change" id="chg-'+item.id+'"></div>'+
+    '<div class="chart-wrap"><canvas id="chart-'+item.id+'"></canvas></div>';
   return a;
 }
 
@@ -227,61 +243,74 @@ async function loadAll(){
 }
 function reloadDash(){cachedData=null;buildDashboard();loadAll();}
 
-// ── 설정 페이지 ──────────────────────────────────────────────────
-function getZoneInfo(mode){
+// ══════════════════════════════════════════════════════════════════
+// 모달
+// ══════════════════════════════════════════════════════════════════
+let modalId=null;
+
+// mode별 4개 경계의 레이블 (좌→우)
+function getBoundaryLabels(mode){
   if(mode==='level_neg'||mode==='yoy_neg'||mode==='target')
-    return{labels:['강긍정','긍정','중립','부정','강부정'],colors:['#27ae60','#8bc34a','#9e9e9e','#e67e22','#e53935']};
-  return{labels:['강부정','부정','중립','긍정','강긍정'],colors:['#e53935','#e67e22','#9e9e9e','#8bc34a','#27ae60']};
+    return[
+      {from:'🟢 강긍정',to:'🟡 긍정',   fc:'#27ae60',tc:'#8bc34a'},
+      {from:'🟡 긍정',  to:'⚪ 중립',   fc:'#8bc34a',tc:'#9e9e9e'},
+      {from:'⚪ 중립',  to:'🟠 부정',   fc:'#9e9e9e',tc:'#e67e22'},
+      {from:'🟠 부정',  to:'🔴 강부정', fc:'#e67e22',tc:'#e53935'},
+    ];
+  return[
+    {from:'🔴 강부정',to:'🟠 부정',   fc:'#e53935',tc:'#e67e22'},
+    {from:'🟠 부정',  to:'⚪ 중립',   fc:'#e67e22',tc:'#9e9e9e'},
+    {from:'⚪ 중립',  to:'🟡 긍정',   fc:'#9e9e9e',tc:'#8bc34a'},
+    {from:'🟡 긍정',  to:'🟢 강긍정', fc:'#8bc34a',tc:'#27ae60'},
+  ];
 }
 
-let toastTimer;
-function showToast(){const t=document.getElementById('toast');t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1500);}
+function openModal(e,id){
+  e.preventDefault();e.stopPropagation();
+  modalId=id;
+  const cfg=T[id];
+  document.getElementById('modalTitle').textContent=cfg.label+' 기준값 설정';
+  document.getElementById('modalSub').textContent=id+' · '+cfg.unit;
+  document.getElementById('modalDesc').innerHTML=cfg.desc.replace(/\n/g,'<br>');
 
-function buildSettingsRow(id,cfg){
-  const{labels,colors}=getZoneInfo(cfg.mode);
-  const row=document.createElement('div');row.className='ind-row';
-  row.innerHTML='<div class="ind-top"><span class="ind-name">'+cfg.label+' <span style="font-size:.65rem;color:#aaa;font-family:monospace">'+id+'</span></span><span class="ind-meta"><span class="mode-badge">'+cfg.desc+'</span><button class="reset-btn" onclick="resetInd(\''+id+'\')">기본값</button></span></div>';
-
-  const editor=document.createElement('div');editor.className='th-editor';
-  for(let i=0;i<5;i++){
-    const zone=document.createElement('div');zone.className='th-zone';
-    zone.innerHTML='<div class="th-zone-bar" style="background:'+colors[i]+'"></div><div class="th-zone-lbl" style="color:'+colors[i]+'">'+labels[i]+'</div>';
-    editor.appendChild(zone);
-    if(i<4){
-      const sep=document.createElement('div');sep.className='th-between';
-      const inp=document.createElement('input');inp.type='number';inp.className='th-input';inp.step='0.1';inp.value=cfg.t[i];inp.dataset.id=id;inp.dataset.idx=i;
-      const ul=document.createElement('div');ul.className='th-unit-lbl';ul.textContent=cfg.unit;
-      inp.addEventListener('change',function(){
-        const v=parseFloat(this.value);if(isNaN(v))return;
-        T[this.dataset.id].t[parseInt(this.dataset.idx)]=v;
-        saveT();if(cachedData)renderAll(cachedData);showToast();
-      });
-      sep.appendChild(inp);sep.appendChild(ul);editor.appendChild(sep);
-    }
-  }
-  row.appendChild(editor);return row;
-}
-
-function resetInd(id){T[id].t=[...DEFAULT_T[id].t];saveT();if(cachedData)renderAll(cachedData);buildSettings();showToast();}
-
-function buildSettings(){
-  const body=document.getElementById('settings-body');body.innerHTML='';
-  GROUPS.forEach(g=>{
-    const sec=document.createElement('div');sec.className='set-section';
-    sec.innerHTML='<div class="set-section-head"><span class="set-section-label">'+g.label+'</span><span class="set-section-name">'+g.name+' ('+g.desc+')</span></div>';
-    g.items.forEach(item=>{const cfg=T[item.id];if(cfg)sec.appendChild(buildSettingsRow(item.id,cfg));});
-    body.appendChild(sec);
+  const bounds=getBoundaryLabels(cfg.mode);
+  const fields=document.getElementById('modalFields');
+  fields.innerHTML='';
+  bounds.forEach((b,i)=>{
+    const f=document.createElement('div');f.className='th-field';
+    f.innerHTML=
+      '<label class="th-label">'+
+        '<span class="th-color-bar" style="background:linear-gradient(90deg,'+b.fc+','+b.tc+')"></span>'+
+        '경계 '+(i+1)+' ('+b.from+' ↔ '+b.to+')'+
+      '</label>'+
+      '<input class="th-input" type="number" step="0.1" id="th-inp-'+i+'" value="'+cfg.t[i]+'">'+
+      '<span class="th-hint">단위: '+cfg.unit+'</span>';
+    fields.appendChild(f);
   });
+
+  document.getElementById('btnReset').onclick=()=>resetModal(id);
+  document.getElementById('modalOverlay').classList.add('open');
 }
 
-function showPage(page){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  document.getElementById('nav-'+page).classList.add('active');
+function resetModal(id){
+  T[id].t=[...DEFAULT_T[id].t];
+  for(let i=0;i<4;i++)document.getElementById('th-inp-'+i).value=DEFAULT_T[id].t[i];
 }
 
-buildDashboard();buildSettings();loadAll();
+function applyModal(){
+  if(!modalId)return;
+  const vals=[];
+  for(let i=0;i<4;i++){const v=parseFloat(document.getElementById('th-inp-'+i).value);if(isNaN(v))return;vals.push(v);}
+  T[modalId].t=vals;saveT();
+  if(cachedData)renderAll(cachedData);
+  closeModalDirect();
+  let tm=document.getElementById('toast');tm.classList.add('show');setTimeout(()=>tm.classList.remove('show'),1500);
+}
+
+function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect();}
+function closeModalDirect(){document.getElementById('modalOverlay').classList.remove('open');modalId=null;}
+
+buildDashboard();loadAll();
 </script>
 </body>
 </html>
