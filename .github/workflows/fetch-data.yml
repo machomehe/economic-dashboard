@@ -5,11 +5,16 @@ on:
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch FRED data
         run: |
@@ -29,36 +34,36 @@ jobs:
           for sid in indicators:
             url = f'https://api.stlouisfed.org/fred/series/observations?series_id={sid}&api_key={API_KEY}&file_type=json&sort_order=desc&limit=20'
             try:
-              req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+              req = urllib.request.Request(url, headers={'User-Agent': 'python-urllib/3'})
               with urllib.request.urlopen(req, timeout=20) as resp:
                 raw = resp.read().decode('utf-8')
                 data = json.loads(raw)
                 if 'error_message' in data:
-                  print(f'{sid} API error: {data["error_message"]}')
+                  print(f'  {sid} API error: {data["error_message"]}')
                   result[sid] = []
                 else:
                   obs = [{'date': o['date'], 'value': o['value']} for o in data.get('observations', [])]
                   result[sid] = obs
-                  print(f'{sid}: {len(obs)} obs, latest={obs[0]["value"] if obs else "N/A"}')
+                  print(f'  {sid}: {len(obs)} obs, latest={obs[0]["value"] + " (" + obs[0]["date"] + ")" if obs else "none"}')
             except Exception as e:
-              print(f'{sid} exception: {e}')
+              print(f'  {sid} error: {type(e).__name__}: {e}')
               result[sid] = []
-            time.sleep(0.3)
+            time.sleep(0.5)
 
           output = {'updated': datetime.datetime.utcnow().isoformat() + 'Z', 'data': result}
           with open('data.json', 'w') as f:
             json.dump(output, f)
-          print('data.json written OK')
+          print('data.json written')
           PYEOF
 
-      - name: Commit data.json
+      - name: Commit and push data.json
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data.json
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "No changes"
           else
             git commit -m "chore: update FRED data"
-            git push
+            git push origin HEAD:main
           fi
