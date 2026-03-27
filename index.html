@@ -7,37 +7,37 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0d1117;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:16px;min-height:100vh}
+body{background:#ffffff;color:#1a1a1a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:16px;min-height:100vh}
 header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 h1{font-size:1.3rem;font-weight:700}
-.subtitle{font-size:.72rem;color:#8b949e;margin-top:3px}
-.last-update{font-size:.7rem;color:#8b949e;text-align:right}
-.refresh-btn{background:#21262d;border:1px solid #30363d;color:#e6edf3;padding:5px 11px;border-radius:6px;cursor:pointer;font-size:.78rem;margin-top:4px}
-.refresh-btn:hover{background:#30363d}
+.subtitle{font-size:.72rem;color:#888888;margin-top:3px}
+.last-update{font-size:.7rem;color:#888888;text-align:right}
+.refresh-btn{background:#f0f0f0;border:1px solid #e0e0e0;color:#1a1a1a;padding:5px 11px;border-radius:6px;cursor:pointer;font-size:.78rem;margin-top:4px}
+.refresh-btn:hover{background:#e0e0e0}
 .status-bar{display:flex;gap:14px;margin-bottom:16px;font-size:.72rem;flex-wrap:wrap}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
 .section{margin-bottom:20px}
 .section-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:7px 12px;border-radius:8px}
 .section-label{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px;letter-spacing:.5px}
 .section-title{font-size:.9rem;font-weight:600}
-.section-desc{font-size:.72rem;color:#8b949e}
+.section-desc{font-size:.72rem;color:#888888}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
 .card{
-  background:#161b22;border:1px solid #30363d;border-radius:9px;padding:13px;
+  background:#ffffff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;
   cursor:pointer;transition:background .15s,border-color .15s;
   text-decoration:none;display:block;color:inherit;
 }
-.card:hover{background:#1c2330;border-color:#58a6ff44}
-.card.pos{border-left:3px solid #f85149}
-.card.neg{border-left:3px solid #58a6ff}
+.card:hover{background:#f5f5f5;border-color:#e67e2244}
+.card.pos{border-left:3px solid #27ae60}
+.card.neg{border-left:3px solid #e67e22}
 .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
-.card-name{font-size:.83rem;font-weight:600;color:#e6edf3;line-height:1.3}
-.card-symbol{font-size:.65rem;color:#484f58;font-family:monospace;margin-top:2px}
+.card-name{font-size:.83rem;font-weight:600;color:#1a1a1a;line-height:1.3}
+.card-symbol{font-size:.65rem;color:#aaaaaa;font-family:monospace;margin-top:2px}
 .card-value-row{display:flex;align-items:baseline;gap:8px;margin-bottom:3px}
 .card-value{font-size:1.5rem;font-weight:700}
-.card-latest-date{font-size:.65rem;color:#484f58}
+.card-latest-date{font-size:.65rem;color:#aaaaaa}
 .card-change{font-size:.77rem;margin-bottom:9px}
-.red-chg{color:#f85149}.blue-chg{color:#58a6ff}.green-chg{color:#3fb950}.neutral-text{color:#8b949e}
+.red-chg{color:#27ae60}.blue-chg{color:#e67e22}.green-chg{color:#1a1a1a}.neutral-text{color:#888888}
 .chart-wrap{height:88px}canvas{max-width:100%}
 @media(max-width:600px){.grid{grid-template-columns:1fr 1fr}}
 @media(max-width:380px){.grid{grid-template-columns:1fr}}
@@ -56,7 +56,7 @@ h1{font-size:1.3rem;font-weight:700}
 </header>
 <div class="status-bar">
   <span id="statusDot"><span class="dot" style="background:#d29922"></span>데이터 로딩 중...</span>
-  <span><span class="dot" style="background:#58a6ff"></span>출처: Federal Reserve Bank of St. Louis</span>
+  <span><span class="dot" style="background:#e67e22"></span>출처: Federal Reserve Bank of St. Louis</span>
 </div>
 <div id="dashboard"></div>
 
@@ -74,7 +74,7 @@ const GROUPS = [
   },
   {
     key:'G', label:'G', name:'성장', desc:'Growth',
-    color:'#3fb950', bg:'rgba(63,185,80,0.08)',
+    color:'#2e7d32', bg:'rgba(46,125,50,0.08)',
     items:[
       {id:'DGORDER', name:'내구재 주문',  sub:'Durable Goods Orders',  unit:'',  rel:'pos'},
       {id:'UNRATE', name:'실업률',     sub:'Unemployment Rate',     unit:'%', rel:'neg'},
@@ -93,22 +93,22 @@ const GROUPS = [
   },
   {
     key:'R', label:'R', name:'위험', desc:'Risk',
-    color:'#f85149', bg:'rgba(248,81,73,0.08)',
+    color:'#e67e22', bg:'rgba(230,126,34,0.08)',
     items:[
       {id:'BAMLH0A0HYM2', name:'하이일드 스프레드', sub:'HY OAS Spread', unit:'%', rel:'neg'},
     ]
   }
 ];
+const C_GREEN='#27ae60', C_ORANGE='#e67e22', C_BLACK='#1a1a1a';
 const charts = {};
 function fmtDate(d){const [y,m]=d.split('-');return parseInt(m)+'/'+y.slice(2);}
 function fmt(v,u){if(v===null||v===undefined||isNaN(parseFloat(v)))return 'N/A';const n=parseFloat(v);const s=Math.abs(n)>=1000?n.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2}):n.toFixed(2);return u==='$'?'$'+s:u==='%'?s+'%':s;}
-function buildCard(item){const a=document.createElement('a');a.className='card '+item.rel;a.id='card-'+item.id;a.href='https://fred.stlouisfed.org/series/'+item.id;a.target='_blank';a.rel='noopener noreferrer';const badge=item.rel==='pos'?'비례':'반비례';a.innerHTML='<div class="card-header"><div><div class="card-name">'+item.name+'</div><div class="card-symbol">'+item.id+' · '+item.sub+'</div></div><span style="font-size:.62rem;color:#484f58;white-space:nowrap;padding-top:2px">'+badge+'</span></div><div class="card-value-row"><div class="card-value" id="val-'+item.id+'"><span style="color:#484f58;font-size:.8rem">—</span></div><div class="card-latest-date" id="date-'+item.id+'"></div></div><div class="card-change" id="chg-'+item.id+'"></div><div class="chart-wrap"><canvas id="chart-'+item.id+'"></canvas></div>';return a;}
-function renderCard(item,obs){const card=document.getElementById('card-'+item.id);const valEl=document.getElementById('val-'+item.id);const dateEl=document.getElementById('date-'+item.id);const chgEl=document.getElementById('chg-'+item.id);const valid=(obs||[]).filter(d=>d.value!=='.'&&!isNaN(parseFloat(d.value)));if(!valid.length){valEl.innerHTML='<span style="color:#484f58;font-size:.8rem">데이터 없음</span>';return;}const latest=parseFloat(valid[0].value);const prev=valid.length>1?parseFloat(valid[1].value):null;const diff=prev!==null?latest-prev:null;valEl.textContent=fmt(latest,item.unit);dateEl.textContent=fmtDate(valid[0].date);let dynColor='#3fb950';if(diff!==null){const cls=diff===0?'green-chg':item.rel==='pos'?(diff>0?'red-chg':'blue-chg'):(diff>0?'blue-chg':'red-chg');dynColor=diff===0?'#3fb950':item.rel==='pos'?(diff>0?'#f85149':'#58a6ff'):(diff>0?'#58a6ff':'#f85149');card.style.borderLeftColor=dynColor;const arrow=diff>0?'▲':diff<0?'▼':'→';chgEl.innerHTML='<span class="'+cls+'">'+arrow+' '+(diff>0?'+':'')+diff.toFixed(2)+item.unit+' 전기 대비</span>';}const cd=valid.slice(0,13).reverse().map(d=>parseFloat(d.value));const lb=valid.slice(0,13).reverse().map(d=>fmtDate(d.date));const ctx=document.getElementById('chart-'+item.id);if(!ctx)return;if(charts[item.id])charts[item.id].destroy();charts[item.id]=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{data:cd,borderColor:dynColor,borderWidth:1.5,fill:true,backgroundColor:dynColor+'18',pointRadius:3,pointHoverRadius:5,pointBackgroundColor:dynColor,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:(items)=>items[0].label,label:(c)=>' '+fmt(c.parsed.y,item.unit)}}},scales:{x:{display:true,ticks:{color:'#484f58',font:{size:8},maxRotation:45,minRotation:30,callback:function(val,idx,ticks){const label=this.getLabelForValue(val);if(!label)return null;if(idx===ticks.length-1)return label;const month=parseInt(label.split('/')[0]);return(month===1||month===4||month===7||month===10)?label:null;}},grid:{color:'#21262d'}},y:{display:true,position:'right',ticks:{color:'#484f58',font:{size:8},maxTicksLimit:3},grid:{color:'#21262d'}}},animation:false}});}
-function buildDashboard(){const dash=document.getElementById('dashboard');GROUPS.forEach(g=>{const sec=document.createElement('div');sec.className='section';sec.innerHTML='<div class="section-header" style="background:'+g.bg+';border-left:3px solid '+g.color+'"><span class="section-label" style="background:'+g.color+';color:#0d1117">'+g.label+'</span><span class="section-title">'+g.name+'</span><span class="section-desc">· '+g.desc+'</span></div><div class="grid" id="grid-'+g.key+'"></div>';dash.appendChild(sec);const grid=sec.querySelector('#grid-'+g.key);g.items.forEach(item=>grid.appendChild(buildCard(item)));});}
-async function loadAll(){try{const r=await fetch('data.json?t='+Date.now());if(!r.ok)throw new Error('data.json HTTP '+r.status);const j=await r.json();GROUPS.forEach(g=>g.items.forEach(item=>renderCard(item,j.data[item.id]||[])));const upd=j.updated?new Date(j.updated).toLocaleString('ko-KR'):'알 수 없음';document.getElementById('lastUpdate').textContent='데이터 기준: '+upd;document.getElementById('statusDot').innerHTML='<span class="dot" style="background:#3fb950"></span>FRED 연결됨';}catch(e){document.getElementById('lastUpdate').textContent='⚠ '+e.message;document.getElementById('statusDot').innerHTML='<span class="dot" style="background:#f85149"></span>오류';console.error(e);}}
+function buildCard(item){const a=document.createElement('a');a.className='card '+item.rel;a.id='card-'+item.id;a.href='https://fred.stlouisfed.org/series/'+item.id;a.target='_blank';a.rel='noopener noreferrer';const badge=item.rel==='pos'?'비례':'반비례';a.innerHTML='<div class="card-header"><div><div class="card-name">'+item.name+'</div><div class="card-symbol">'+item.id+' · '+item.sub+'</div></div><span style="font-size:.62rem;color:#aaaaaa;white-space:nowrap;padding-top:2px">'+badge+'</span></div><div class="card-value-row"><div class="card-value" id="val-'+item.id+'"><span style="color:#aaaaaa;font-size:.8rem">—</span></div><div class="card-latest-date" id="date-'+item.id+'"></div></div><div class="card-change" id="chg-'+item.id+'"></div><div class="chart-wrap"><canvas id="chart-'+item.id+'"></canvas></div>';return a;}
+function renderCard(item,obs){const card=document.getElementById('card-'+item.id);const valEl=document.getElementById('val-'+item.id);const dateEl=document.getElementById('date-'+item.id);const chgEl=document.getElementById('chg-'+item.id);const valid=(obs||[]).filter(d=>d.value!=='.'&&!isNaN(parseFloat(d.value)));if(!valid.length){valEl.innerHTML='<span style="color:#aaaaaa;font-size:.8rem">데이터 없음</span>';return;}const latest=parseFloat(valid[0].value);const prev=valid.length>1?parseFloat(valid[1].value):null;const diff=prev!==null?latest-prev:null;valEl.textContent=fmt(latest,item.unit);dateEl.textContent=fmtDate(valid[0].date);let dynColor=C_BLACK;if(diff!==null){const cls=diff===0?'green-chg':item.rel==='pos'?(diff>0?'red-chg':'blue-chg'):(diff>0?'blue-chg':'red-chg');dynColor=diff===0?C_BLACK:item.rel==='pos'?(diff>0?C_GREEN:C_ORANGE):(diff>0?C_ORANGE:C_GREEN);card.style.borderLeftColor=dynColor;const arrow=diff>0?'▲':diff<0?'▼':'→';chgEl.innerHTML='<span class="'+cls+'">'+arrow+' '+(diff>0?'+':'')+diff.toFixed(2)+item.unit+' 전기 대비</span>';}const cd=valid.slice(0,13).reverse().map(d=>parseFloat(d.value));const lb=valid.slice(0,13).reverse().map(d=>fmtDate(d.date));const ctx=document.getElementById('chart-'+item.id);if(!ctx)return;if(charts[item.id])charts[item.id].destroy();charts[item.id]=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{data:cd,borderColor:dynColor,borderWidth:1.5,fill:true,backgroundColor:dynColor+'18',pointRadius:3,pointHoverRadius:5,pointBackgroundColor:dynColor,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:(items)=>items[0].label,label:(c)=>' '+fmt(c.parsed.y,item.unit)}}},scales:{x:{display:true,ticks:{color:'#aaaaaa',font:{size:8},maxRotation:45,minRotation:30,callback:function(val,idx,ticks){const label=this.getLabelForValue(val);if(!label)return null;if(idx===ticks.length-1)return label;const month=parseInt(label.split('/')[0]);return(month===1||month===4||month===7||month===10)?label:null;}},grid:{color:'#eeeeee'}},y:{display:true,position:'right',ticks:{color:'#aaaaaa',font:{size:8},maxTicksLimit:3},grid:{color:'#eeeeee'}}},animation:false}});}
+function buildDashboard(){const dash=document.getElementById('dashboard');GROUPS.forEach(g=>{const sec=document.createElement('div');sec.className='section';sec.innerHTML='<div class="section-header" style="background:'+g.bg+';border-left:3px solid '+g.color+'"><span class="section-label" style="background:'+g.color+';color:#ffffff">'+g.label+'</span><span class="section-title">'+g.name+'</span><span class="section-desc">· '+g.desc+'</span></div><div class="grid" id="grid-'+g.key+'"></div>';dash.appendChild(sec);const grid=sec.querySelector('#grid-'+g.key);g.items.forEach(item=>grid.appendChild(buildCard(item)));});}
+async function loadAll(){try{const r=await fetch('data.json?t='+Date.now());if(!r.ok)throw new Error('data.json HTTP '+r.status);const j=await r.json();GROUPS.forEach(g=>g.items.forEach(item=>renderCard(item,j.data[item.id]||[])));const upd=j.updated?new Date(j.updated).toLocaleString('ko-KR'):'알 수 없음';document.getElementById('lastUpdate').textContent='데이터 기준: '+upd;document.getElementById('statusDot').innerHTML='<span class="dot" style="background:#27ae60"></span>FRED 연결됨';}catch(e){document.getElementById('lastUpdate').textContent='⚠ '+e.message;document.getElementById('statusDot').innerHTML='<span class="dot" style="background:#e67e22"></span>오류';console.error(e);}}
 buildDashboard();
 loadAll();
 </script>
 </body>
 </html>
-
