@@ -34,29 +34,22 @@ h1{font-size:1.3rem;font-weight:700}
 .card-value{font-size:1.5rem;font-weight:700}
 .card-latest-date{font-size:.65rem;color:#aaa}
 .card-change{font-size:.77rem;margin-bottom:9px}
-.sp{color:#27ae60}.p{color:#8bc34a}.n{color:#9e9e9e}.ng{color:#e67e22}.sn{color:#e53935}
+.p{color:#27ae60}.n{color:#9e9e9e}.ng{color:#e53935}
 .chart-wrap{height:88px}canvas{max-width:100%}
 
 /* ── 모달 ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:12px;padding:20px;width:min(480px,92vw);max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
-.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
-.modal-title{font-size:1rem;font-weight:700}
+.modal{background:#fff;border-radius:12px;padding:20px;width:min(360px,92vw);box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.modal-title{font-size:.95rem;font-weight:700}
 .modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:#aaa;line-height:1;padding:0}
 .modal-close:hover{color:#333}
-.modal-sub{font-size:.72rem;color:#888;margin-bottom:16px}
-.modal-desc{font-size:.72rem;color:#555;background:#f8f8f8;padding:8px 10px;border-radius:7px;margin-bottom:16px;line-height:1.5}
-.legend-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;font-size:.68rem}
-.leg-item{display:flex;align-items:center;gap:3px}
-.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.th-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-.th-field{display:flex;flex-direction:column;gap:4px}
-.th-label{font-size:.68rem;font-weight:600;display:flex;align-items:center;gap:5px}
-.th-color-bar{width:12px;height:12px;border-radius:3px;flex-shrink:0}
-.th-input{padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:.82rem;color:#333;width:100%}
+.th-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.th-field{display:flex;flex-direction:column;gap:5px}
+.th-label{font-size:.72rem;font-weight:600;color:#555}
+.th-input{padding:7px 9px;border:1px solid #ddd;border-radius:6px;font-size:.88rem;color:#333;width:100%;text-align:center}
 .th-input:focus{outline:none;border-color:#888}
-.th-hint{font-size:.62rem;color:#aaa}
 .modal-actions{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;padding-top:14px}
 .btn-reset{font-size:.75rem;color:#aaa;background:none;border:1px solid #e0e0e0;padding:6px 14px;border-radius:6px;cursor:pointer}
 .btn-reset:hover{background:#f5f5f5;color:#555}
@@ -85,19 +78,10 @@ h1{font-size:1.3rem;font-weight:700}
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="modalTitle">지표 설정</div>
+      <div class="modal-title" id="modalTitle">기준값 설정</div>
       <button class="modal-close" onclick="closeModalDirect()">×</button>
     </div>
-    <div class="modal-sub" id="modalSub"></div>
-    <div class="modal-desc" id="modalDesc"></div>
-    <div class="legend-row">
-      <span class="leg-item"><span class="leg-dot" style="background:#27ae60"></span>강긍정</span>
-      <span class="leg-item"><span class="leg-dot" style="background:#8bc34a"></span>긍정</span>
-      <span class="leg-item"><span class="leg-dot" style="background:#9e9e9e"></span>중립</span>
-      <span class="leg-item"><span class="leg-dot" style="background:#e67e22"></span>부정</span>
-      <span class="leg-item"><span class="leg-dot" style="background:#e53935"></span>강부정</span>
-    </div>
-    <div class="th-grid" id="modalFields"></div>
+    <div class="th-row" id="modalFields"></div>
     <div class="modal-actions">
       <button class="btn-reset" id="btnReset">기본값으로 초기화</button>
       <button class="btn-apply" onclick="applyModal()">적용</button>
@@ -108,45 +92,43 @@ h1{font-size:1.3rem;font-weight:700}
 <div class="save-toast" id="toast">✓ 저장됨</div>
 
 <script>
-// ══════════════════════════════════════════════════════════════════
-// 기본 기준값
-// ══════════════════════════════════════════════════════════════════
+// ── 기본 기준값 (t: [긍정↔중립 경계, 중립↔부정 경계]) ──
 const DEFAULT_T={
-  FEDFUNDS:    {mode:'level_neg',t:[1.5,3.0,4.5,5.5],   unit:'%',   label:'정책금리',         desc:'절대값 기준, 낮을수록 완화적\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
-  DFII10:      {mode:'level_neg',t:[-0.5,0.5,1.5,2.5],  unit:'%',   label:'실질금리 10Y',     desc:'절대값 기준, 낮을수록 완화적\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
-  DGS10:       {mode:'level_neg',t:[2.0,3.5,4.5,5.5],   unit:'%',   label:'국채금리 10Y',     desc:'절대값 기준, 낮을수록 완화적\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
-  T10Y2Y:      {mode:'level_pos',t:[-0.5,0.0,0.5,1.5],  unit:'%',   label:'수익률곡선',       desc:'절대값 기준, 높을수록 정상\n강부정 < 경계1 ≤ 부정 < 경계2 ≤ 중립 < 경계3 ≤ 긍정 < 경계4 ≤ 강긍정'},
-  DGORDER:     {mode:'dir_pos',  t:[-5.0,-2.0,0.0,3.0], unit:'MoM%',label:'내구재 주문',      desc:'전월 대비 변화율(%), 높을수록 긍정\n강부정 < 경계1 ≤ 부정 < 경계2 ≤ 중립 < 경계3 ≤ 긍정 < 경계4 ≤ 강긍정'},
-  UNRATE:      {mode:'level_neg',t:[3.5,4.5,5.5,7.0],   unit:'%',   label:'실업률',           desc:'절대값 기준, 낮을수록 건전\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
-  PAYEMS:      {mode:'dir_pos',  t:[-150,-50,50,200],    unit:'천명',label:'비농업고용',       desc:'전월 대비 증감(천명), 높을수록 긍정\n강부정 < 경계1 ≤ 부정 < 경계2 ≤ 중립 < 경계3 ≤ 긍정 < 경계4 ≤ 강긍정'},
-  INDPRO:      {mode:'dir_pos',  t:[-1.5,-0.5,0.0,1.0], unit:'MoM%',label:'산업생산',         desc:'전월 대비 변화율(%), 높을수록 긍정\n강부정 < 경계1 ≤ 부정 < 경계2 ≤ 중립 < 경계3 ≤ 긍정 < 경계4 ≤ 강긍정'},
-  CPILFESL:    {mode:'yoy_neg',  t:[2.0,3.0,4.0,6.0],   unit:'YoY%',label:'코어 CPI',         desc:'전년 대비 변화율(%), 낮을수록 안정\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
-  T10YIE:      {mode:'target',   t:[0.3,0.7,1.2,2.0],   unit:'거리',label:'기대인플레 10Y',   desc:'목표(2%)와의 거리, 가까울수록 좋음\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
-  CPIAUCSL:    {mode:'yoy_neg',  t:[2.0,3.0,4.0,6.0],   unit:'YoY%',label:'CPI',              desc:'전년 대비 변화율(%), 낮을수록 안정\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
-  BAMLH0A0HYM2:{mode:'level_neg',t:[2.5,3.5,5.0,7.0],   unit:'%p',  label:'하이일드 스프레드',desc:'절대값 기준, 낮을수록 안정\n강긍정 ≤ 경계1 < 긍정 ≤ 경계2 < 중립 ≤ 경계3 < 부정 ≤ 경계4 < 강부정'},
+  FEDFUNDS:    {mode:'level_neg',t:[3.0,4.5],  unit:'%',   label:'정책금리'},
+  DFII10:      {mode:'level_neg',t:[0.5,1.5],  unit:'%',   label:'실질금리 10Y'},
+  DGS10:       {mode:'level_neg',t:[3.5,4.5],  unit:'%',   label:'국채금리 10Y'},
+  T10Y2Y:      {mode:'level_pos',t:[0.0,0.5],  unit:'%',   label:'수익률곡선'},
+  DGORDER:     {mode:'dir_pos',  t:[-2.0,0.0], unit:'MoM%',label:'내구재 주문'},
+  UNRATE:      {mode:'level_neg',t:[4.5,5.5],  unit:'%',   label:'실업률'},
+  PAYEMS:      {mode:'dir_pos',  t:[-50,50],    unit:'천명',label:'비농업고용'},
+  INDPRO:      {mode:'dir_pos',  t:[-0.5,0.0], unit:'MoM%',label:'산업생산'},
+  CPILFESL:    {mode:'yoy_neg',  t:[3.0,4.0],  unit:'YoY%',label:'코어 CPI'},
+  T10YIE:      {mode:'target',   t:[0.7,1.2],  unit:'거리',label:'기대인플레 10Y'},
+  CPIAUCSL:    {mode:'yoy_neg',  t:[3.0,4.0],  unit:'YoY%',label:'CPI'},
+  BAMLH0A0HYM2:{mode:'level_neg',t:[3.5,5.0],  unit:'%p',  label:'하이일드 스프레드'},
 };
 
 function loadT(){
-  try{const s=JSON.parse(localStorage.getItem('eco_t')||'{}');const m={};
+  try{const s=JSON.parse(localStorage.getItem('eco_t3')||'{}');const m={};
     for(const id in DEFAULT_T)m[id]=s[id]?{...DEFAULT_T[id],t:[...s[id].t]}:{...DEFAULT_T[id],t:[...DEFAULT_T[id].t]};
     return m;}
   catch(e){return Object.fromEntries(Object.entries(DEFAULT_T).map(([k,v])=>[k,{...v,t:[...v.t]}]));}
 }
-function saveT(){const o={};for(const id in T)o[id]={t:[...T[id].t]};localStorage.setItem('eco_t',JSON.stringify(o));}
+function saveT(){const o={};for(const id in T)o[id]={t:[...T[id].t]};localStorage.setItem('eco_t3',JSON.stringify(o));}
 let T=loadT();
 
-const C={sp:'#27ae60',p:'#8bc34a',n:'#9e9e9e',ng:'#e67e22',sn:'#e53935'};
+const C={p:'#27ae60',n:'#9e9e9e',ng:'#e53935'};
 
 function classify(id,value,diff,prev,valid){
   const cfg=T[id];if(!cfg)return'n';
-  const[t0,t1,t2,t3]=cfg.t;
-  if(cfg.mode==='level_neg'){if(value<=t0)return'sp';if(value<=t1)return'p';if(value<=t2)return'n';if(value<=t3)return'ng';return'sn';}
-  if(cfg.mode==='level_pos'){if(value<t0)return'sn';if(value<t1)return'ng';if(value<t2)return'n';if(value<t3)return'p';return'sp';}
-  if(cfg.mode==='target'){const d=Math.abs(value-2.0);if(d<=t0)return'sp';if(d<=t1)return'p';if(d<=t2)return'n';if(d<=t3)return'ng';return'sn';}
+  const[t0,t1]=cfg.t;
+  if(cfg.mode==='level_neg'){if(value<=t0)return'p';if(value<=t1)return'n';return'ng';}
+  if(cfg.mode==='level_pos'){if(value<t0)return'ng';if(value<t1)return'n';return'p';}
+  if(cfg.mode==='target'){const d=Math.abs(value-2.0);if(d<=t0)return'p';if(d<=t1)return'n';return'ng';}
   if(cfg.mode==='yoy_neg'){let v=value;if(valid&&valid.length>=13){const ya=parseFloat(valid[12].value);if(!isNaN(ya)&&ya>0)v=(value/ya-1)*100;}
-    if(v<=t0)return'sp';if(v<=t1)return'p';if(v<=t2)return'n';if(v<=t3)return'ng';return'sn';}
+    if(v<=t0)return'p';if(v<=t1)return'n';return'ng';}
   if(cfg.mode==='dir_pos'){let v=diff||0;if(id==='DGORDER'||id==='INDPRO')v=prev&&prev!==0?(diff/prev)*100:0;
-    if(v<t0)return'sn';if(v<t1)return'ng';if(v<t2)return'n';if(v<t3)return'p';return'sp';}
+    if(v<t0)return'ng';if(v<t1)return'n';return'p';}
   return'n';
 }
 
@@ -243,68 +225,48 @@ async function loadAll(){
 }
 function reloadDash(){cachedData=null;buildDashboard();loadAll();}
 
-// ══════════════════════════════════════════════════════════════════
-// 모달
-// ══════════════════════════════════════════════════════════════════
+// ── 모달 ──
 let modalId=null;
-
-// mode별 4개 경계의 레이블 (좌→우)
-function getBoundaryLabels(mode){
-  if(mode==='level_neg'||mode==='yoy_neg'||mode==='target')
-    return[
-      {from:'🟢 강긍정',to:'🟡 긍정',   fc:'#27ae60',tc:'#8bc34a'},
-      {from:'🟡 긍정',  to:'⚪ 중립',   fc:'#8bc34a',tc:'#9e9e9e'},
-      {from:'⚪ 중립',  to:'🟠 부정',   fc:'#9e9e9e',tc:'#e67e22'},
-      {from:'🟠 부정',  to:'🔴 강부정', fc:'#e67e22',tc:'#e53935'},
-    ];
-  return[
-    {from:'🔴 강부정',to:'🟠 부정',   fc:'#e53935',tc:'#e67e22'},
-    {from:'🟠 부정',  to:'⚪ 중립',   fc:'#e67e22',tc:'#9e9e9e'},
-    {from:'⚪ 중립',  to:'🟡 긍정',   fc:'#9e9e9e',tc:'#8bc34a'},
-    {from:'🟡 긍정',  to:'🟢 강긍정', fc:'#8bc34a',tc:'#27ae60'},
-  ];
-}
 
 function openModal(e,id){
   e.preventDefault();e.stopPropagation();
   modalId=id;
   const cfg=T[id];
-  document.getElementById('modalTitle').textContent=cfg.label+' 기준값 설정';
-  document.getElementById('modalSub').textContent=id+' · '+cfg.unit;
-  document.getElementById('modalDesc').innerHTML=cfg.desc.replace(/\n/g,'<br>');
+  document.getElementById('modalTitle').textContent=cfg.label+' ('+cfg.unit+')';
 
-  const bounds=getBoundaryLabels(cfg.mode);
+  // mode에 따라 레이블 방향 결정
+  const posFirst=(cfg.mode==='level_pos'||cfg.mode==='dir_pos');
+  const l0=posFirst?'부정 → 중립':'긍정 → 중립';
+  const l1=posFirst?'중립 → 긍정':'중립 → 부정';
+
   const fields=document.getElementById('modalFields');
-  fields.innerHTML='';
-  bounds.forEach((b,i)=>{
-    const f=document.createElement('div');f.className='th-field';
-    f.innerHTML=
-      '<label class="th-label">'+
-        '<span class="th-color-bar" style="background:linear-gradient(90deg,'+b.fc+','+b.tc+')"></span>'+
-        '경계 '+(i+1)+' ('+b.from+' ↔ '+b.to+')'+
-      '</label>'+
-      '<input class="th-input" type="number" step="0.1" id="th-inp-'+i+'" value="'+cfg.t[i]+'">'+
-      '<span class="th-hint">단위: '+cfg.unit+'</span>';
-    fields.appendChild(f);
-  });
+  fields.innerHTML=
+    '<div class="th-field">'+
+      '<label class="th-label">경계 1 ('+l0+')</label>'+
+      '<input class="th-input" type="number" step="0.1" id="th-inp-0" value="'+cfg.t[0]+'">'+
+    '</div>'+
+    '<div class="th-field">'+
+      '<label class="th-label">경계 2 ('+l1+')</label>'+
+      '<input class="th-input" type="number" step="0.1" id="th-inp-1" value="'+cfg.t[1]+'">'+
+    '</div>';
 
-  document.getElementById('btnReset').onclick=()=>resetModal(id);
+  document.getElementById('btnReset').onclick=()=>{
+    const d=DEFAULT_T[id];
+    document.getElementById('th-inp-0').value=d.t[0];
+    document.getElementById('th-inp-1').value=d.t[1];
+  };
   document.getElementById('modalOverlay').classList.add('open');
-}
-
-function resetModal(id){
-  T[id].t=[...DEFAULT_T[id].t];
-  for(let i=0;i<4;i++)document.getElementById('th-inp-'+i).value=DEFAULT_T[id].t[i];
 }
 
 function applyModal(){
   if(!modalId)return;
-  const vals=[];
-  for(let i=0;i<4;i++){const v=parseFloat(document.getElementById('th-inp-'+i).value);if(isNaN(v))return;vals.push(v);}
-  T[modalId].t=vals;saveT();
+  const v0=parseFloat(document.getElementById('th-inp-0').value);
+  const v1=parseFloat(document.getElementById('th-inp-1').value);
+  if(isNaN(v0)||isNaN(v1))return;
+  T[modalId].t=[v0,v1];saveT();
   if(cachedData)renderAll(cachedData);
   closeModalDirect();
-  let tm=document.getElementById('toast');tm.classList.add('show');setTimeout(()=>tm.classList.remove('show'),1500);
+  const tm=document.getElementById('toast');tm.classList.add('show');setTimeout(()=>tm.classList.remove('show'),1500);
 }
 
 function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect();}
