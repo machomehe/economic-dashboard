@@ -35,7 +35,7 @@ h1{font-size:1.3rem;font-weight:700}
 .card-latest-date{font-size:.65rem;color:#aaa}
 .card-change{font-size:.77rem;margin-bottom:9px}
 .p{color:#27ae60}.n{color:#9e9e9e}.ng{color:#e53935}
-.chart-wrap{height:88px}canvas{max-width:100%}
+.chart-wrap{height:100px}canvas{max-width:100%}
 
 /* ── 모달 ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center}
@@ -47,11 +47,13 @@ h1{font-size:1.3rem;font-weight:700}
 .modal-close:hover{color:#333}
 .axis-seg-labels{display:flex;margin-bottom:6px}
 .axis-seg-lbl{flex:1;text-align:center;font-size:.75rem;font-weight:700}
-.axis-track{position:relative;padding-bottom:38px;margin-bottom:6px}
-.axis-bar{display:flex;height:10px;border-radius:5px;overflow:hidden}
-.axis-bar-seg{flex:1}
+.axis-track{position:relative;padding-bottom:44px;margin-bottom:6px}
+.axis-bar{display:flex;height:32px;border-radius:6px;overflow:hidden}
+.axis-bar-seg{flex:1;position:relative}
+.axis-bar-seg::after{content:'';position:absolute;top:50%;left:0;right:0;height:1.5px;background:rgba(255,255,255,0.45)}
 .axis-tick{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center}
-.axis-tick-line{width:2px;height:14px;background:rgba(0,0,0,0.15)}
+.axis-tick-line{width:2px;height:36px;background:rgba(255,255,255,0.7);position:relative}
+.axis-tick-line::before{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:2px;height:6px;background:rgba(0,0,0,0.12)}
 .th-input{margin-top:4px;width:62px;padding:5px 4px;border:1px solid #ddd;border-radius:6px;font-size:.84rem;color:#333;text-align:center;display:block}
 .th-input:focus{outline:none;border-color:#888}
 .axis-hint{font-size:.7rem;color:#bbb;margin-bottom:14px}
@@ -160,6 +162,51 @@ const GROUPS=[
   ]},
 ];
 
+// ── 차트 영역 색상 플러그인 ──
+const zonePlugin={
+  id:'zonePlugin',
+  beforeDatasetsDraw(chart){
+    const o=chart.options.plugins&&chart.options.plugins.zonePlugin;
+    if(!o||!o.zones)return;
+    const{ctx,chartArea,scales}=chart;
+    if(!chartArea||!scales.y)return;
+    const{left,right,top,bottom}=chartArea,ys=scales.y;
+    o.zones.forEach(z=>{
+      const yT=z.yMax===Infinity?top:Math.max(top,ys.getPixelForValue(z.yMax));
+      const yB=z.yMin===-Infinity?bottom:Math.min(bottom,ys.getPixelForValue(z.yMin));
+      if(yT>=yB)return;
+      ctx.fillStyle=z.color;ctx.fillRect(left,yT,right-left,yB-yT);
+    });
+    (o.thresholds||[]).forEach(th=>{
+      const y=ys.getPixelForValue(th.value);
+      if(y<top||y>bottom)return;
+      ctx.save();ctx.strokeStyle=th.color;ctx.lineWidth=1;
+      ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();ctx.restore();
+    });
+  }
+};
+
+function getZoneCfg(id){
+  const cfg=T[id];if(!cfg)return null;
+  const[t0,t1]=cfg.t;
+  const ga='rgba(39,174,96,0.10)',ra='rgba(229,57,53,0.10)';
+  const gl='rgba(39,174,96,0.6)',rl='rgba(229,57,53,0.6)';
+  if(cfg.mode==='level_neg'){
+    return{zones:[{yMin:-Infinity,yMax:t0,color:ga},{yMin:t1,yMax:Infinity,color:ra}],
+           thresholds:[{value:t0,color:gl},{value:t1,color:rl}]};
+  }
+  if(cfg.mode==='level_pos'){
+    return{zones:[{yMin:-Infinity,yMax:t0,color:ra},{yMin:t1,yMax:Infinity,color:ga}],
+           thresholds:[{value:t0,color:rl},{value:t1,color:gl}]};
+  }
+  if(cfg.mode==='target'){
+    const c=2.0,g0=c-t0,g1=c+t0,n0=c-t1,n1=c+t1;
+    return{zones:[{yMin:g0,yMax:g1,color:ga},{yMin:-Infinity,yMax:n0,color:ra},{yMin:n1,yMax:Infinity,color:ra}],
+           thresholds:[{value:g0,color:gl},{value:g1,color:gl},{value:n0,color:rl},{value:n1,color:rl}]};
+  }
+  return null;
+}
+
 const charts={};let cachedData=null;
 function fmtDate(d){const[y,m]=d.split('-');return parseInt(m)+'/'+y.slice(2);}
 function fmt(v,u){if(v===null||v===undefined||isNaN(parseFloat(v)))return'N/A';const n=parseFloat(v);const s=Math.abs(n)>=1000?n.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2}):n.toFixed(2);return u==='$'?'$'+s:u==='%'?s+'%':s;}
@@ -199,7 +246,8 @@ function renderCard(item,obs){
   const lb=valid.slice(0,13).reverse().map(d=>fmtDate(d.date));
   const ctx=document.getElementById('chart-'+item.id);if(!ctx)return;
   if(charts[item.id])charts[item.id].destroy();
-  charts[item.id]=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{data:cd,borderColor:color,borderWidth:1.5,fill:true,backgroundColor:color+'18',pointRadius:3,pointHoverRadius:5,pointBackgroundColor:color,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:items=>items[0].label,label:c=>' '+fmt(c.parsed.y,item.unit)}}},scales:{x:{display:true,ticks:{color:'#aaa',font:{size:8},maxRotation:45,minRotation:30,callback:function(val,idx,ticks){const label=this.getLabelForValue(val);if(!label)return null;if(idx===ticks.length-1)return label;const month=parseInt(label.split('/')[0]);return(month===1||month===4||month===7||month===10)?label:null;}},grid:{color:'#eeeeee'}},y:{display:true,position:'right',ticks:{color:'#aaa',font:{size:8},maxTicksLimit:3},grid:{color:'#eeeeee'}}},animation:false}});
+  const zoneCfg=getZoneCfg(item.id)||{};
+  charts[item.id]=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{data:cd,borderColor:color,borderWidth:1.5,fill:false,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:color,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:items=>items[0].label,label:c=>' '+fmt(c.parsed.y,item.unit)}},zonePlugin:zoneCfg},scales:{x:{display:true,ticks:{color:'#aaa',font:{size:8},maxRotation:45,minRotation:30,callback:function(val,idx,ticks){const label=this.getLabelForValue(val);if(!label)return null;if(idx===ticks.length-1)return label;const month=parseInt(label.split('/')[0]);return(month===1||month===4||month===7||month===10)?label:null;}},grid:{color:'#f0f0f0'}},y:{display:true,position:'right',ticks:{color:'#aaa',font:{size:8},maxTicksLimit:3},grid:{color:'#f0f0f0'}}},animation:false},plugins:[zonePlugin]});
 }
 
 function renderAll(data){GROUPS.forEach(g=>g.items.forEach(item=>renderCard(item,data[item.id]||[])));}
@@ -255,9 +303,9 @@ function openModal(e,id){
     '</div>'+
     '<div class="axis-track">'+
       '<div class="axis-bar">'+
-        '<div class="axis-bar-seg" style="background:'+lc+'35;border-top:3px solid '+lc+'"></div>'+
-        '<div class="axis-bar-seg" style="background:'+nc+'25;border-top:3px solid '+nc+'"></div>'+
-        '<div class="axis-bar-seg" style="background:'+rc+'35;border-top:3px solid '+rc+'"></div>'+
+        '<div class="axis-bar-seg" style="background:'+lc+'28;border-left:3px solid '+lc+'88"></div>'+
+        '<div class="axis-bar-seg" style="background:'+nc+'18"></div>'+
+        '<div class="axis-bar-seg" style="background:'+rc+'28;border-right:3px solid '+rc+'88"></div>'+
       '</div>'+
       '<div class="axis-tick" style="left:33.33%">'+
         '<div class="axis-tick-line"></div>'+
