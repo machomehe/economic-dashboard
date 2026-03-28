@@ -180,8 +180,8 @@ const zonePlugin={
     (o.thresholds||[]).forEach(th=>{
       const y=ys.getPixelForValue(th.value);
       if(y<top||y>bottom)return;
-      ctx.save();ctx.strokeStyle=th.color;ctx.lineWidth=1;
-      ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();ctx.restore();
+      ctx.save();ctx.strokeStyle=th.color;ctx.lineWidth=1.5;ctx.globalAlpha=0.6;
+      ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();ctx.restore();
     });
   }
 };
@@ -189,8 +189,8 @@ const zonePlugin={
 function getZoneCfg(id){
   const cfg=T[id];if(!cfg)return null;
   const[t0,t1]=cfg.t;
-  const ga='rgba(39,174,96,0.10)',ra='rgba(229,57,53,0.10)';
-  const gl='rgba(39,174,96,0.6)',rl='rgba(229,57,53,0.6)';
+  const ga='rgba(39,174,96,0.13)',ra='rgba(229,57,53,0.13)';
+  const gl='#27ae60',rl='#e53935';
   if(cfg.mode==='level_neg'){
     return{zones:[{yMin:-Infinity,yMax:t0,color:ga},{yMin:t1,yMax:Infinity,color:ra}],
            thresholds:[{value:t0,color:gl},{value:t1,color:rl}]};
@@ -204,6 +204,16 @@ function getZoneCfg(id){
     return{zones:[{yMin:g0,yMax:g1,color:ga},{yMin:-Infinity,yMax:n0,color:ra},{yMin:n1,yMax:Infinity,color:ra}],
            thresholds:[{value:g0,color:gl},{value:g1,color:gl},{value:n0,color:rl},{value:n1,color:rl}]};
   }
+  return null;
+}
+
+// 단일 값의 구간 색상 반환 (zone이 있는 모드만)
+function getPointColor(id,value){
+  const cfg=T[id];if(!cfg)return null;
+  const[t0,t1]=cfg.t;
+  if(cfg.mode==='level_neg'){return value<=t0?C.p:value<=t1?C.n:C.ng;}
+  if(cfg.mode==='level_pos'){return value<t0?C.ng:value<t1?C.n:C.p;}
+  if(cfg.mode==='target'){const d=Math.abs(value-2.0);return d<=t0?C.p:d<=t1?C.n:C.ng;}
   return null;
 }
 
@@ -247,7 +257,14 @@ function renderCard(item,obs){
   const ctx=document.getElementById('chart-'+item.id);if(!ctx)return;
   if(charts[item.id])charts[item.id].destroy();
   const zoneCfg=getZoneCfg(item.id)||{};
-  charts[item.id]=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{data:cd,borderColor:color,borderWidth:1.5,fill:false,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:color,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:items=>items[0].label,label:c=>' '+fmt(c.parsed.y,item.unit)}},zonePlugin:zoneCfg},scales:{x:{display:true,ticks:{color:'#aaa',font:{size:8},maxRotation:45,minRotation:30,callback:function(val,idx,ticks){const label=this.getLabelForValue(val);if(!label)return null;if(idx===ticks.length-1)return label;const month=parseInt(label.split('/')[0]);return(month===1||month===4||month===7||month===10)?label:null;}},grid:{color:'#f0f0f0'}},y:{display:true,position:'right',ticks:{color:'#aaa',font:{size:8},maxTicksLimit:3},grid:{color:'#f0f0f0'}}},animation:false},plugins:[zonePlugin]});
+  const hasZone=!!(zoneCfg.zones);
+  const ptColors=cd.map(v=>{const c=getPointColor(item.id,v);return c||color;});
+  charts[item.id]=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{data:cd,borderWidth:1.5,fill:false,
+    borderColor:ctx2=>{ const v=cd[ctx2.p0DataIndex];const c=getPointColor(item.id,v);return c||color; },
+    segment:{borderColor:ctx2=>{const v=cd[ctx2.p0DataIndex];const c=getPointColor(item.id,v);return c||color;}},
+    pointRadius:4,pointHoverRadius:6,
+    pointBackgroundColor:ptColors,pointBorderColor:ptColors,tension:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:items=>items[0].label,label:c=>' '+fmt(c.parsed.y,item.unit)}},zonePlugin:zoneCfg},scales:{x:{display:true,ticks:{color:'#aaa',font:{size:8},maxRotation:45,minRotation:30,callback:function(val,idx,ticks){const label=this.getLabelForValue(val);if(!label)return null;if(idx===ticks.length-1)return label;const month=parseInt(label.split('/')[0]);return(month===1||month===4||month===7||month===10)?label:null;}},grid:{color:'#f0f0f0'}},y:{display:true,position:'right',ticks:{color:'#aaa',font:{size:8},maxTicksLimit:3},grid:{color:'#f0f0f0'}}},animation:false},plugins:[zonePlugin]});
 }
 
 function renderAll(data){GROUPS.forEach(g=>g.items.forEach(item=>renderCard(item,data[item.id]||[])));}
