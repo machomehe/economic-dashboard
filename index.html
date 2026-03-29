@@ -23,8 +23,8 @@ h1{font-size:1.3rem;font-weight:700}
 .section-desc{font-size:.72rem;color:#888;flex:1}
 .add-item-btn{background:none;border:1.5px solid #ccc;color:#aaa;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s}
 .add-item-btn:hover{border-color:#555;color:#555}
-.del-group-btn{background:none;border:none;color:#ddd;width:22px;height:22px;border-radius:5px;cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s}
-.del-group-btn:hover{color:#e53935}
+.del-group-btn{background:none;border:1.5px solid #ccc;color:#aaa;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s}
+.del-group-btn:hover{border-color:#e53935;color:#e53935}
 .card-name-link{color:inherit;text-decoration:none}
 .card-name-link:hover{text-decoration:underline;color:#555}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
@@ -112,8 +112,8 @@ h1{font-size:1.3rem;font-weight:700}
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
     <div class="last-update" id="lastUpdate">로딩 중...</div>
     <div style="display:flex;gap:6px;align-items:center">
-      <button class="config-btn" onclick="copyConfig()" title="설정 복사">📋</button>
-      <button class="config-btn" onclick="pasteConfig()" title="설정 붙여넣기">📥</button>
+      <button class="config-btn" onclick="copyConfig()">복사</button>
+      <button class="config-btn" onclick="pasteConfig()">붙여넣기</button>
       <button class="config-btn" onclick="toggleConfigPanel()">⚙ 설정 입력</button>
       <button class="refresh-btn" onclick="reloadDash()">↻ 새로고침</button>
     </div>
