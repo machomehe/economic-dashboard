@@ -17,10 +17,12 @@ h1{font-size:1.3rem;font-weight:700}
 .status-bar{display:flex;gap:14px;margin-bottom:16px;font-size:.72rem;flex-wrap:wrap}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
 .section{margin-bottom:20px}
-.section-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:7px 12px;border-radius:8px;background:rgba(0,0,0,0.04);border-left:3px solid #555}
-.section-label{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px;background:#555;color:#fff}
+.section-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:7px 12px;border-radius:8px;background:rgba(0,0,0,0.04);border-left:3px solid #555}
+.section-label{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px;background:#555;color:#fff;flex-shrink:0}
 .section-title{font-size:.9rem;font-weight:600}
-.section-desc{font-size:.72rem;color:#888}
+.section-desc{font-size:.72rem;color:#888;flex:1}
+.add-item-btn{background:none;border:1.5px solid #ccc;color:#aaa;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s}
+.add-item-btn:hover{border-color:#555;color:#555}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
 .card{background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;text-decoration:none;display:block;color:inherit;position:relative}
 .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
@@ -36,15 +38,31 @@ h1{font-size:1.3rem;font-weight:700}
 .card-change{font-size:.77rem;margin-bottom:9px}
 .p{color:#27ae60}.n{color:#9e9e9e}.ng{color:#e53935}
 .chart-wrap{height:100px}canvas{max-width:100%}
+.add-group-row{text-align:center;margin:10px 0 20px}
+.add-group-btn{background:#fff;border:1.5px dashed #ccc;color:#aaa;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:.8rem;transition:border-color .15s,color .15s}
+.add-group-btn:hover{border-color:#555;color:#555}
 
-/* ── 모달 ── */
+/* ── 공통 모달 ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:12px;padding:20px;width:min(360px,92vw);box-shadow:0 8px 32px rgba(0,0,0,0.15)}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.modal{background:#fff;border-radius:12px;padding:20px;width:min(420px,94vw);max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .modal-title{font-size:.95rem;font-weight:700}
 .modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:#aaa;line-height:1;padding:0}
 .modal-close:hover{color:#333}
+.field-row{display:flex;gap:10px;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field.grow{flex:1}
+.field-label{font-size:.7rem;font-weight:600;color:#888;letter-spacing:.03em}
+.field-input{padding:7px 10px;border:1px solid #e0e0e0;border-radius:7px;font-size:.85rem;color:#1a1a1a;width:100%;background:#fff}
+.field-input:focus{outline:none;border-color:#888}
+.field-input:disabled{background:#f8f8f8;color:#aaa}
+.field-select{padding:7px 10px;border:1px solid #e0e0e0;border-radius:7px;font-size:.85rem;color:#1a1a1a;width:100%;background:#fff;cursor:pointer}
+.field-select:focus{outline:none;border-color:#888}
+.rel-toggle{display:flex;margin-bottom:16px;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden}
+.rel-btn{flex:1;padding:8px;font-size:.78rem;font-weight:600;border:none;background:#fff;cursor:pointer;color:#aaa;transition:background .15s,color .15s}
+.rel-btn.active-pos{background:#27ae60;color:#fff}
+.rel-btn.active-neg{background:#e53935;color:#fff}
 .axis-seg-labels{display:flex;margin-bottom:6px}
 .axis-seg-lbl{flex:1;text-align:center;font-size:.75rem;font-weight:700}
 .axis-track{position:relative;padding-bottom:44px;margin-bottom:6px}
@@ -52,16 +70,18 @@ h1{font-size:1.3rem;font-weight:700}
 .axis-bar-seg{flex:1;position:relative}
 .axis-bar-seg::after{content:'';position:absolute;top:50%;left:0;right:0;height:1.5px;background:rgba(255,255,255,0.45)}
 .axis-tick{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center}
-.axis-tick-line{width:2px;height:36px;background:rgba(255,255,255,0.7);position:relative}
-.axis-tick-line::before{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:2px;height:6px;background:rgba(0,0,0,0.12)}
+.axis-tick-line{width:2px;height:36px;background:rgba(255,255,255,0.7)}
 .th-input{margin-top:4px;width:62px;padding:5px 4px;border:1px solid #ddd;border-radius:6px;font-size:.84rem;color:#333;text-align:center;display:block}
 .th-input:focus{outline:none;border-color:#888}
-.axis-hint{font-size:.7rem;color:#bbb;margin-bottom:14px}
-.modal-actions{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;padding-top:14px}
-.btn-reset{font-size:.75rem;color:#aaa;background:none;border:1px solid #e0e0e0;padding:6px 14px;border-radius:6px;cursor:pointer}
+.axis-hint{font-size:.7rem;color:#bbb;margin-bottom:12px}
+.modal-actions{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;padding-top:14px;margin-top:4px;gap:8px}
+.btn-danger{font-size:.75rem;color:#e53935;background:none;border:1px solid #fcc;padding:6px 12px;border-radius:6px;cursor:pointer}
+.btn-danger:hover{background:#fff5f5}
+.btn-reset{font-size:.75rem;color:#aaa;background:none;border:1px solid #e0e0e0;padding:6px 12px;border-radius:6px;cursor:pointer}
 .btn-reset:hover{background:#f5f5f5;color:#555}
-.btn-apply{font-size:.78rem;font-weight:600;color:#fff;background:#1a1a1a;border:none;padding:7px 20px;border-radius:6px;cursor:pointer}
+.btn-apply{font-size:.78rem;font-weight:600;color:#fff;background:#1a1a1a;border:none;padding:7px 20px;border-radius:6px;cursor:pointer;margin-left:auto}
 .btn-apply:hover{background:#333}
+.divider{border:none;border-top:1px solid #f0f0f0;margin:14px 0}
 .save-toast{position:fixed;bottom:20px;right:20px;background:#1a1a1a;color:#fff;padding:8px 16px;border-radius:8px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
 .save-toast.show{opacity:1}
 @media(max-width:600px){.grid{grid-template-columns:1fr 1fr}}
@@ -80,18 +100,82 @@ h1{font-size:1.3rem;font-weight:700}
   <span><span class="dot" style="background:#9e9e9e"></span>출처: FRED</span>
 </div>
 <div id="dashboard"></div>
+<div class="add-group-row">
+  <button class="add-group-btn" onclick="openGroupModal()">+ 그룹 추가</button>
+</div>
 
-<!-- 설정 모달 -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+<!-- 지표 설정/추가 모달 -->
+<div class="modal-overlay" id="itemModalOverlay" onclick="closeItemModal(event)">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="modalTitle">기준값 설정</div>
-      <button class="modal-close" onclick="closeModalDirect()">×</button>
+      <div class="modal-title" id="itemModalTitle">지표 설정</div>
+      <button class="modal-close" onclick="closeItemModalDirect()">×</button>
     </div>
-    <div id="modalAxis"></div>
+    <div class="field-row">
+      <div class="field grow">
+        <div class="field-label">FRED ID</div>
+        <input class="field-input" type="text" id="inp-fredid" placeholder="예: DGS10">
+      </div>
+      <div class="field" style="width:80px">
+        <div class="field-label">단위</div>
+        <input class="field-input" type="text" id="inp-unit" placeholder="%">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field grow">
+        <div class="field-label">제목</div>
+        <input class="field-input" type="text" id="inp-title" placeholder="표시할 이름">
+      </div>
+      <div class="field" style="width:100px">
+        <div class="field-label">심볼</div>
+        <input class="field-input" type="text" id="inp-symbol" placeholder="코드">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field grow">
+        <div class="field-label">계산 방식</div>
+        <select class="field-select" id="inp-mode">
+          <option value="level">절대값 (level)</option>
+          <option value="dir">전기 대비 변화 (dir)</option>
+          <option value="yoy">전년 대비 YoY (yoy)</option>
+          <option value="target">목표와의 거리 (target)</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-label" style="margin-bottom:6px">방향</div>
+    <div class="rel-toggle">
+      <button class="rel-btn" id="item-btn-pos" onclick="itemSetRel('pos')">↑ 비례 — 높을수록 좋음</button>
+      <button class="rel-btn" id="item-btn-neg" onclick="itemSetRel('neg')">↓ 반비례 — 낮을수록 좋음</button>
+    </div>
+    <div class="field-label" style="margin-bottom:8px">기준값</div>
+    <div id="itemAxis"></div>
     <div class="modal-actions">
-      <button class="btn-reset" id="btnReset">기본값으로 초기화</button>
-      <button class="btn-apply" onclick="applyModal()">적용</button>
+      <button class="btn-danger" id="btnDeleteItem" style="display:none" onclick="deleteItem()">삭제</button>
+      <button class="btn-reset" id="btnResetItem">초기화</button>
+      <button class="btn-apply" id="btnApplyItem" onclick="applyItemModal()">적용</button>
+    </div>
+  </div>
+</div>
+
+<!-- 그룹 추가 모달 -->
+<div class="modal-overlay" id="groupModalOverlay" onclick="closeGroupModal(event)">
+  <div class="modal" style="width:min(320px,94vw)">
+    <div class="modal-header">
+      <div class="modal-title">그룹 추가</div>
+      <button class="modal-close" onclick="closeGroupModalDirect()">×</button>
+    </div>
+    <div class="field-row" style="flex-direction:column;gap:12px">
+      <div class="field">
+        <div class="field-label">그룹명</div>
+        <input class="field-input" type="text" id="grp-name" placeholder="예: 원자재">
+      </div>
+      <div class="field">
+        <div class="field-label">설명 (영문)</div>
+        <input class="field-input" type="text" id="grp-desc" placeholder="예: Commodities">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-apply" onclick="applyGroupModal()">추가</button>
     </div>
   </div>
 </div>
@@ -99,70 +183,74 @@ h1{font-size:1.3rem;font-weight:700}
 <div class="save-toast" id="toast">✓ 저장됨</div>
 
 <script>
-// ── 기본 기준값 (t: [긍정↔중립 경계, 중립↔부정 경계]) ──
-const DEFAULT_T={
-  FEDFUNDS:    {mode:'level_neg',t:[3.0,4.5],  unit:'%',   label:'정책금리'},
-  DFII10:      {mode:'level_neg',t:[0.5,1.5],  unit:'%',   label:'실질금리 10Y'},
-  DGS10:       {mode:'level_neg',t:[3.5,4.5],  unit:'%',   label:'국채금리 10Y'},
-  T10Y2Y:      {mode:'level_pos',t:[0.0,0.5],  unit:'%',   label:'수익률곡선'},
-  DGORDER:     {mode:'dir_pos',  t:[-2.0,0.0], unit:'MoM%',label:'내구재 주문'},
-  UNRATE:      {mode:'level_neg',t:[4.5,5.5],  unit:'%',   label:'실업률'},
-  PAYEMS:      {mode:'dir_pos',  t:[-50,50],    unit:'천명',label:'비농업고용'},
-  INDPRO:      {mode:'dir_pos',  t:[-0.5,0.0], unit:'MoM%',label:'산업생산'},
-  CPILFESL:    {mode:'yoy_neg',  t:[3.0,4.0],  unit:'YoY%',label:'코어 CPI'},
-  T10YIE:      {mode:'target',   t:[0.7,1.2],  unit:'거리',label:'기대인플레 10Y'},
-  CPIAUCSL:    {mode:'yoy_neg',  t:[3.0,4.0],  unit:'YoY%',label:'CPI'},
-  BAMLH0A0HYM2:{mode:'level_neg',t:[3.5,5.0],  unit:'%p',  label:'하이일드 스프레드'},
-};
-
-function loadT(){
-  try{const s=JSON.parse(localStorage.getItem('eco_t3')||'{}');const m={};
-    for(const id in DEFAULT_T)m[id]=s[id]?{...DEFAULT_T[id],t:[...s[id].t]}:{...DEFAULT_T[id],t:[...DEFAULT_T[id].t]};
-    return m;}
-  catch(e){return Object.fromEntries(Object.entries(DEFAULT_T).map(([k,v])=>[k,{...v,t:[...v.t]}]));}
-}
-function saveT(){const o={};for(const id in T)o[id]={t:[...T[id].t]};localStorage.setItem('eco_t3',JSON.stringify(o));}
-let T=loadT();
-
-const C={p:'#27ae60',n:'#9e9e9e',ng:'#e53935'};
-
-function classify(id,value,diff,prev,valid){
-  const cfg=T[id];if(!cfg)return'n';
-  const[t0,t1]=cfg.t;
-  if(cfg.mode==='level_neg'){if(value<=t0)return'p';if(value<=t1)return'n';return'ng';}
-  if(cfg.mode==='level_pos'){if(value<t0)return'ng';if(value<t1)return'n';return'p';}
-  if(cfg.mode==='target'){const d=Math.abs(value-2.0);if(d<=t0)return'p';if(d<=t1)return'n';return'ng';}
-  if(cfg.mode==='yoy_neg'){let v=value;if(valid&&valid.length>=13){const ya=parseFloat(valid[12].value);if(!isNaN(ya)&&ya>0)v=(value/ya-1)*100;}
-    if(v<=t0)return'p';if(v<=t1)return'n';return'ng';}
-  if(cfg.mode==='dir_pos'){let v=diff||0;if(id==='DGORDER'||id==='INDPRO')v=prev&&prev!==0?(diff/prev)*100:0;
-    if(v<t0)return'ng';if(v<t1)return'n';return'p';}
-  return'n';
-}
-
-const GROUPS=[
-  {key:'L',label:'L',name:'유동성',desc:'Liquidity',items:[
-    {id:'FEDFUNDS',name:'정책금리',sub:'Fed Funds Target',unit:'%',rel:'neg'},
-    {id:'DFII10',name:'실질금리 10Y',sub:'TIPS Real Yield',unit:'%',rel:'neg'},
-    {id:'DGS10',name:'국채금리 10Y',sub:'US Treasury 10Y',unit:'%',rel:'neg'},
-    {id:'T10Y2Y',name:'수익률곡선',sub:'10Y-2Y Spread',unit:'%',rel:'pos'},
+// ══════════════════════════════════════════════════════
+// 기본 상태 정의
+// ══════════════════════════════════════════════════════
+const DEFAULT_GROUPS=[
+  {key:'L',name:'유동성',desc:'Liquidity',items:[
+    {id:'FEDFUNDS',title:'정책금리',   symbol:'FFR',   unit:'%',   mode:'level',rel:'neg',t:[3.0,4.5]},
+    {id:'DFII10',  title:'실질금리 10Y',symbol:'TIPS',  unit:'%',   mode:'level',rel:'neg',t:[0.5,1.5]},
+    {id:'DGS10',   title:'국채금리 10Y',symbol:'UST10', unit:'%',   mode:'level',rel:'neg',t:[3.5,4.5]},
+    {id:'T10Y2Y',  title:'수익률곡선', symbol:'2s10s', unit:'%',   mode:'level',rel:'pos',t:[0.0,0.5]},
   ]},
-  {key:'G',label:'G',name:'성장',desc:'Growth',items:[
-    {id:'DGORDER',name:'내구재 주문',sub:'Durable Goods Orders',unit:'',rel:'pos'},
-    {id:'UNRATE',name:'실업률',sub:'Unemployment Rate',unit:'%',rel:'neg'},
-    {id:'PAYEMS',name:'비농업고용',sub:'NFP (천명)',unit:'',rel:'pos'},
-    {id:'INDPRO',name:'산업생산',sub:'Industrial Production',unit:'',rel:'pos'},
+  {key:'G',name:'성장',desc:'Growth',items:[
+    {id:'DGORDER', title:'내구재 주문', symbol:'DGO',   unit:'',    mode:'dir',  rel:'pos',t:[-2.0,0.0]},
+    {id:'UNRATE',  title:'실업률',     symbol:'UR',    unit:'%',   mode:'level',rel:'neg',t:[4.5,5.5]},
+    {id:'PAYEMS',  title:'비농업고용', symbol:'NFP',   unit:'',    mode:'dir',  rel:'pos',t:[-50,50]},
+    {id:'INDPRO',  title:'산업생산',   symbol:'IP',    unit:'',    mode:'dir',  rel:'pos',t:[-0.5,0.0]},
   ]},
-  {key:'D',label:'D',name:'디스 인플레',desc:'Dis-inflation',items:[
-    {id:'CPILFESL',name:'코어 CPI',sub:'Core CPI',unit:'',rel:'neg'},
-    {id:'T10YIE',name:'기대인플레 10Y',sub:'Breakeven Inflation',unit:'%',rel:'neg'},
-    {id:'CPIAUCSL',name:'CPI',sub:'Headline CPI',unit:'',rel:'neg'},
+  {key:'D',name:'디스인플레',desc:'Dis-inflation',items:[
+    {id:'CPILFESL',title:'코어 CPI',   symbol:'CCPI',  unit:'',    mode:'yoy',  rel:'neg',t:[3.0,4.0]},
+    {id:'T10YIE',  title:'기대인플레', symbol:'BEI',   unit:'%',   mode:'target',rel:'neg',t:[0.7,1.2]},
+    {id:'CPIAUCSL',title:'CPI',        symbol:'CPI',   unit:'',    mode:'yoy',  rel:'neg',t:[3.0,4.0]},
   ]},
-  {key:'R',label:'R',name:'위험',desc:'Risk',items:[
-    {id:'BAMLH0A0HYM2',name:'하이일드 스프레드',sub:'HY OAS Spread',unit:'%',rel:'neg'},
+  {key:'R',name:'위험',desc:'Risk',items:[
+    {id:'BAMLH0A0HYM2',title:'하이일드 스프레드',symbol:'HY',unit:'%',mode:'level',rel:'neg',t:[3.5,5.0]},
   ]},
 ];
 
-// ── 차트 영역 색상 플러그인 ──
+// FRED 공식 명칭 (고정)
+const FRED_NAME={
+  FEDFUNDS:'Fed Funds Rate',DFII10:'TIPS Real Yield 10Y',DGS10:'US Treasury 10Y',
+  T10Y2Y:'10Y-2Y Spread',DGORDER:'Durable Goods Orders',UNRATE:'Unemployment Rate',
+  PAYEMS:'Nonfarm Payrolls',INDPRO:'Industrial Production',CPILFESL:'Core CPI',
+  T10YIE:'Breakeven Inflation 10Y',CPIAUCSL:'CPI All Urban',BAMLH0A0HYM2:'HY OAS Spread',
+};
+
+// ── 상태 로드/저장 ──
+function loadGroups(){
+  try{const s=localStorage.getItem('eco_groups');
+    return s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT_GROUPS));}
+  catch(e){return JSON.parse(JSON.stringify(DEFAULT_GROUPS));}
+}
+function saveGroups(){localStorage.setItem('eco_groups',JSON.stringify(groups));}
+let groups=loadGroups();
+
+// item 찾기
+function findItem(id){
+  for(const g of groups){const item=g.items.find(i=>i.id===id);if(item)return{item,group:g};}
+  return null;
+}
+
+const C={p:'#27ae60',n:'#9e9e9e',ng:'#e53935'};
+
+// ── 분류 ──
+function classify(item,value,diff,prev,valid){
+  const[t0,t1]=item.t;const rel=item.rel||'neg';
+  let v=value;
+  if(item.mode==='yoy'){
+    if(valid&&valid.length>=13){const ya=parseFloat(valid[12].value);if(!isNaN(ya)&&ya>0)v=(value/ya-1)*100;}
+  }else if(item.mode==='dir'){
+    v=diff||0;
+    if(item.id==='DGORDER'||item.id==='INDPRO')v=prev&&prev!==0?(diff/prev)*100:0;
+  }else if(item.mode==='target'){
+    v=Math.abs(value-2.0);return v<=t0?'p':v<=t1?'n':'ng';
+  }
+  if(rel==='neg')return v<=t0?'p':v<=t1?'n':'ng';
+  return v<t0?'ng':v<t1?'n':'p';
+}
+
+// ── 차트 영역 플러그인 ──
 const zonePlugin={
   id:'zonePlugin',
   beforeDatasetsDraw(chart){
@@ -174,8 +262,7 @@ const zonePlugin={
     o.zones.forEach(z=>{
       const yT=z.yMax===Infinity?top:Math.max(top,ys.getPixelForValue(z.yMax));
       const yB=z.yMin===-Infinity?bottom:Math.min(bottom,ys.getPixelForValue(z.yMin));
-      if(yT>=yB)return;
-      ctx.fillStyle=z.color;ctx.fillRect(left,yT,right-left,yB-yT);
+      if(yT>=yB)return;ctx.fillStyle=z.color;ctx.fillRect(left,yT,right-left,yB-yT);
     });
     (o.thresholds||[]).forEach(th=>{
       const y=ys.getPixelForValue(th.value);
@@ -186,51 +273,45 @@ const zonePlugin={
   }
 };
 
-function getZoneCfg(id){
-  const cfg=T[id];if(!cfg)return null;
-  const[t0,t1]=cfg.t;
-  const ga='rgba(39,174,96,0.13)',ra='rgba(229,57,53,0.13)';
-  const gl='#27ae60',rl='#e53935';
-  if(cfg.mode==='level_neg'){
-    return{zones:[{yMin:-Infinity,yMax:t0,color:ga},{yMin:t1,yMax:Infinity,color:ra}],
-           thresholds:[{value:t0,color:gl},{value:t1,color:rl}]};
-  }
-  if(cfg.mode==='level_pos'){
-    return{zones:[{yMin:-Infinity,yMax:t0,color:ra},{yMin:t1,yMax:Infinity,color:ga}],
-           thresholds:[{value:t0,color:rl},{value:t1,color:gl}]};
-  }
-  if(cfg.mode==='target'){
+function getZoneCfg(item){
+  if(item.mode!=='level'&&item.mode!=='target')return null;
+  const[t0,t1]=item.t;
+  const ga='rgba(39,174,96,0.13)',ra='rgba(229,57,53,0.13)',gl='#27ae60',rl='#e53935';
+  if(item.mode==='target'){
     const c=2.0,g0=c-t0,g1=c+t0,n0=c-t1,n1=c+t1;
     return{zones:[{yMin:g0,yMax:g1,color:ga},{yMin:-Infinity,yMax:n0,color:ra},{yMin:n1,yMax:Infinity,color:ra}],
            thresholds:[{value:g0,color:gl},{value:g1,color:gl},{value:n0,color:rl},{value:n1,color:rl}]};
   }
-  return null;
+  if(item.rel==='neg')return{zones:[{yMin:-Infinity,yMax:t0,color:ga},{yMin:t1,yMax:Infinity,color:ra}],thresholds:[{value:t0,color:gl},{value:t1,color:rl}]};
+  return{zones:[{yMin:-Infinity,yMax:t0,color:ra},{yMin:t1,yMax:Infinity,color:ga}],thresholds:[{value:t0,color:rl},{value:t1,color:gl}]};
 }
 
-// 단일 값의 구간 색상 반환 (zone이 있는 모드만)
-function getPointColor(id,value){
-  const cfg=T[id];if(!cfg)return null;
-  const[t0,t1]=cfg.t;
-  if(cfg.mode==='level_neg'){return value<=t0?C.p:value<=t1?C.n:C.ng;}
-  if(cfg.mode==='level_pos'){return value<t0?C.ng:value<t1?C.n:C.p;}
-  if(cfg.mode==='target'){const d=Math.abs(value-2.0);return d<=t0?C.p:d<=t1?C.n:C.ng;}
-  return null;
+function getPointColor(item,value){
+  if(item.mode!=='level')return null;
+  const[t0,t1]=item.t;
+  if(item.rel==='neg')return value<=t0?C.p:value<=t1?C.n:C.ng;
+  return value<t0?C.ng:value<t1?C.n:C.p;
 }
 
 const charts={};let cachedData=null;
 function fmtDate(d){const[y,m]=d.split('-');return parseInt(m)+'/'+y.slice(2);}
 function fmt(v,u){if(v===null||v===undefined||isNaN(parseFloat(v)))return'N/A';const n=parseFloat(v);const s=Math.abs(n)>=1000?n.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2}):n.toFixed(2);return u==='$'?'$'+s:u==='%'?s+'%':s;}
 
+// ── 카드 빌드/렌더 ──
 function buildCard(item){
   const a=document.createElement('a');a.className='card';a.id='card-'+item.id;
   a.href='https://fred.stlouisfed.org/series/'+item.id;a.target='_blank';a.rel='noopener noreferrer';
   const badge=item.rel==='pos'?'비례':'반비례';
+  const fredSub=FRED_NAME[item.id]||item.id;
   a.innerHTML=
     '<div class="card-header">'+
-      '<div><div class="card-name">'+item.name+'</div><div class="card-symbol">'+item.id+' · '+item.sub+'</div></div>'+
+      '<div>'+
+        '<div class="card-name" id="lbl-title-'+item.id+'">'+item.title+'</div>'+
+        '<div class="card-symbol" id="lbl-sym-'+item.id+'">'+item.symbol+' · '+fredSub+'</div>'+
+      '</div>'+
       '<div class="card-meta">'+
-        '<span class="badge">'+badge+'</span>'+
-        '<button class="gear-btn" title="기준값 설정" onclick="openModal(event,\''+item.id+'\')">⚙︎</button>'+
+        '<span class="badge" id="lbl-badge-'+item.id+'">'+badge+'</span>'+
+        '<button class="gear-btn" title="설정" onclick="openItemModal(event,\''+item.id+'\')">⚙︎</button>'+
       '</div>'+
     '</div>'+
     '<div class="card-value-row"><div class="card-value" id="val-'+item.id+'"><span style="color:#aaa;font-size:.8rem">—</span></div><div class="card-latest-date" id="date-'+item.id+'"></div></div>'+
@@ -240,15 +321,14 @@ function buildCard(item){
 }
 
 function renderCard(item,obs){
-  const card=document.getElementById('card-'+item.id);
   const valEl=document.getElementById('val-'+item.id);
   const dateEl=document.getElementById('date-'+item.id);
   const chgEl=document.getElementById('chg-'+item.id);
-  if(!card||!valEl)return;
+  if(!valEl)return;
   const valid=(obs||[]).filter(d=>d.value!=='.'&&!isNaN(parseFloat(d.value)));
   if(!valid.length){valEl.innerHTML='<span style="color:#aaa;font-size:.8rem">데이터 없음</span>';return;}
   const latest=parseFloat(valid[0].value),prev=valid.length>1?parseFloat(valid[1].value):null,diff=prev!==null?latest-prev:null;
-  const key=classify(item.id,latest,diff,prev,valid),color=C[key];
+  const key=classify(item,latest,diff,prev,valid),color=C[key];
   valEl.textContent=fmt(latest,item.unit);valEl.style.color=color;
   dateEl.textContent=fmtDate(valid[0].date);
   if(diff!==null){const arrow=diff>0?'▲':diff<0?'▼':'→';chgEl.innerHTML='<span class="'+key+'">'+arrow+' '+(diff>0?'+':'')+diff.toFixed(2)+item.unit+' 전기 대비</span>';}
@@ -256,24 +336,40 @@ function renderCard(item,obs){
   const lb=valid.slice(0,13).reverse().map(d=>fmtDate(d.date));
   const ctx=document.getElementById('chart-'+item.id);if(!ctx)return;
   if(charts[item.id])charts[item.id].destroy();
-  const zoneCfg=getZoneCfg(item.id)||{};
-  const hasZone=!!(zoneCfg.zones);
-  const ptColors=cd.map(v=>{const c=getPointColor(item.id,v);return c||color;});
-  charts[item.id]=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{data:cd,borderWidth:1.5,fill:false,
-    borderColor:ctx2=>{ const v=cd[ctx2.p0DataIndex];const c=getPointColor(item.id,v);return c||color; },
-    segment:{borderColor:ctx2=>{const v=cd[ctx2.p0DataIndex];const c=getPointColor(item.id,v);return c||color;}},
-    pointRadius:4,pointHoverRadius:6,
-    pointBackgroundColor:ptColors,pointBorderColor:ptColors,tension:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:items=>items[0].label,label:c=>' '+fmt(c.parsed.y,item.unit)}},zonePlugin:zoneCfg},scales:{x:{display:true,ticks:{color:'#aaa',font:{size:8},maxRotation:45,minRotation:30,callback:function(val,idx,ticks){const label=this.getLabelForValue(val);if(!label)return null;if(idx===ticks.length-1)return label;const month=parseInt(label.split('/')[0]);return(month===1||month===4||month===7||month===10)?label:null;}},grid:{color:'#f0f0f0'}},y:{display:true,position:'right',ticks:{color:'#aaa',font:{size:8},maxTicksLimit:3},grid:{color:'#f0f0f0'}}},animation:false},plugins:[zonePlugin]});
+  const zoneCfg=getZoneCfg(item)||{};
+  const ptColors=cd.map(v=>{const c=getPointColor(item,v);return c||color;});
+  charts[item.id]=new Chart(ctx,{type:'line',
+    data:{labels:lb,datasets:[{data:cd,borderWidth:1.5,fill:false,
+      segment:{borderColor:ctx2=>{const c=getPointColor(item,cd[ctx2.p0DataIndex]);return c||color;}},
+      pointRadius:4,pointHoverRadius:6,pointBackgroundColor:ptColors,pointBorderColor:ptColors,tension:0}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{enabled:true,callbacks:{title:i=>i[0].label,label:c=>' '+fmt(c.parsed.y,item.unit)}},zonePlugin:zoneCfg},
+      scales:{
+        x:{display:true,ticks:{color:'#aaa',font:{size:8},maxRotation:45,minRotation:30,
+          callback:function(val,idx,ticks){const label=this.getLabelForValue(val);if(!label)return null;
+            if(idx===ticks.length-1)return label;const month=parseInt(label.split('/')[0]);
+            return(month===1||month===4||month===7||month===10)?label:null;}},grid:{color:'#f0f0f0'}},
+        y:{display:true,position:'right',ticks:{color:'#aaa',font:{size:8},maxTicksLimit:3},grid:{color:'#f0f0f0'}}},
+      animation:false},
+    plugins:[zonePlugin]});
 }
 
-function renderAll(data){GROUPS.forEach(g=>g.items.forEach(item=>renderCard(item,data[item.id]||[])));}
+function renderAll(data){
+  groups.forEach(g=>g.items.forEach(item=>renderCard(item,data[item.id]||[])));
+}
 
 function buildDashboard(){
   const dash=document.getElementById('dashboard');dash.innerHTML='';
-  GROUPS.forEach(g=>{
-    const sec=document.createElement('div');sec.className='section';
-    sec.innerHTML='<div class="section-header"><span class="section-label">'+g.label+'</span><span class="section-title">'+g.name+'</span><span class="section-desc">· '+g.desc+'</span></div><div class="grid" id="grid-'+g.key+'"></div>';
+  groups.forEach(g=>{
+    const sec=document.createElement('div');sec.className='section';sec.id='sec-'+g.key;
+    sec.innerHTML=
+      '<div class="section-header">'+
+        '<span class="section-label">'+g.key+'</span>'+
+        '<span class="section-title">'+g.name+'</span>'+
+        '<span class="section-desc">· '+g.desc+'</span>'+
+        '<button class="add-item-btn" title="지표 추가" onclick="openAddItemModal(\''+g.key+'\')">+</button>'+
+      '</div>'+
+      '<div class="grid" id="grid-'+g.key+'"></div>';
     dash.appendChild(sec);
     const grid=sec.querySelector('#grid-'+g.key);
     g.items.forEach(item=>grid.appendChild(buildCard(item)));
@@ -290,29 +386,32 @@ async function loadAll(){
   }catch(e){
     document.getElementById('lastUpdate').textContent='⚠ '+e.message;
     document.getElementById('statusDot').innerHTML='<span class="dot" style="background:#e53935"></span>오류';
-    console.error(e);
   }
 }
 function reloadDash(){cachedData=null;buildDashboard();loadAll();}
 
-// ── 모달 ──
-let modalId=null;
+// ══════════════════════════════════════════════════════
+// 지표 설정/추가 모달
+// ══════════════════════════════════════════════════════
+let itemModalId=null;     // null = 추가 모드
+let itemModalGroupKey=null;
+let itemModalRel='neg';
 
-function openModal(e,id){
-  e.preventDefault();e.stopPropagation();
-  modalId=id;
-  const cfg=T[id];
-  document.getElementById('modalTitle').textContent=cfg.label+' ('+cfg.unit+')';
+function itemSetRel(rel){
+  itemModalRel=rel;
+  document.getElementById('item-btn-pos').className='rel-btn'+(rel==='pos'?' active-pos':'');
+  document.getElementById('item-btn-neg').className='rel-btn'+(rel==='neg'?' active-neg':'');
+  buildItemAxis(rel,
+    parseFloat(document.getElementById('th-inp-0').value)||0,
+    parseFloat(document.getElementById('th-inp-1').value)||1);
+}
 
-  const rightGood=(cfg.mode==='level_pos'||cfg.mode==='dir_pos');
+function buildItemAxis(rel,t0,t1){
   const gc='#27ae60',nc='#9e9e9e',bc='#e53935';
-  const lc=rightGood?bc:gc, rc=rightGood?gc:bc;
-  const ll=rightGood?'나쁨':'좋음', rl=rightGood?'좋음':'나쁨';
-  const hint=cfg.mode==='target'?'2%에 가까울수록 좋음':
-             rightGood?'높을수록 좋음 →':'← 낮을수록 좋음';
-  const hintAlign=rightGood&&cfg.mode!=='target'?'right':'left';
-
-  document.getElementById('modalAxis').innerHTML=
+  const lc=rel==='pos'?bc:gc,rc=rel==='pos'?gc:bc;
+  const ll=rel==='pos'?'나쁨':'좋음',rl=rel==='pos'?'좋음':'나쁨';
+  const hint=rel==='pos'?'높을수록 좋음 →':'← 낮을수록 좋음';
+  document.getElementById('itemAxis').innerHTML=
     '<div class="axis-seg-labels">'+
       '<div class="axis-seg-lbl" style="color:'+lc+'">'+ll+'</div>'+
       '<div class="axis-seg-lbl" style="color:'+nc+'">중립</div>'+
@@ -326,36 +425,160 @@ function openModal(e,id){
       '</div>'+
       '<div class="axis-tick" style="left:33.33%">'+
         '<div class="axis-tick-line"></div>'+
-        '<input class="th-input" type="number" step="0.1" id="th-inp-0" value="'+cfg.t[0]+'">'+
+        '<input class="th-input" type="number" step="0.1" id="th-inp-0" value="'+t0+'">'+
       '</div>'+
       '<div class="axis-tick" style="left:66.66%">'+
         '<div class="axis-tick-line"></div>'+
-        '<input class="th-input" type="number" step="0.1" id="th-inp-1" value="'+cfg.t[1]+'">'+
+        '<input class="th-input" type="number" step="0.1" id="th-inp-1" value="'+t1+'">'+
       '</div>'+
     '</div>'+
-    '<div class="axis-hint" style="text-align:'+hintAlign+'">'+hint+'</div>';
-
-  document.getElementById('btnReset').onclick=()=>{
-    const d=DEFAULT_T[id];
-    document.getElementById('th-inp-0').value=d.t[0];
-    document.getElementById('th-inp-1').value=d.t[1];
-  };
-  document.getElementById('modalOverlay').classList.add('open');
+    '<div class="axis-hint" style="text-align:'+(rel==='pos'?'right':'left')+'">'+hint+'</div>';
 }
 
-function applyModal(){
-  if(!modalId)return;
+// 기존 지표 편집
+function openItemModal(e,id){
+  e.preventDefault();e.stopPropagation();
+  itemModalId=id;itemModalGroupKey=null;
+  const found=findItem(id);if(!found)return;
+  const item=found.item;
+  document.getElementById('itemModalTitle').textContent='설정 — '+item.title;
+  document.getElementById('inp-fredid').value=item.id;
+  document.getElementById('inp-fredid').disabled=true;
+  document.getElementById('inp-unit').value=item.unit||'';
+  document.getElementById('inp-title').value=item.title;
+  document.getElementById('inp-symbol').value=item.symbol;
+  document.getElementById('inp-mode').value=item.mode||'level';
+  itemModalRel=item.rel||'neg';
+  document.getElementById('item-btn-pos').className='rel-btn'+(itemModalRel==='pos'?' active-pos':'');
+  document.getElementById('item-btn-neg').className='rel-btn'+(itemModalRel==='neg'?' active-neg':'');
+  buildItemAxis(itemModalRel,item.t[0],item.t[1]);
+  document.getElementById('btnDeleteItem').style.display='';
+  document.getElementById('btnResetItem').style.display='';
+  document.getElementById('btnApplyItem').textContent='적용';
+  document.getElementById('btnResetItem').onclick=()=>{
+    // DEFAULT_GROUPS에서 원본 찾기
+    for(const g of DEFAULT_GROUPS){const d=g.items.find(i=>i.id===id);
+      if(d){document.getElementById('inp-title').value=d.title;
+            document.getElementById('inp-symbol').value=d.symbol;
+            document.getElementById('inp-unit').value=d.unit||'';
+            document.getElementById('inp-mode').value=d.mode||'level';
+            itemModalRel=d.rel;
+            document.getElementById('item-btn-pos').className='rel-btn'+(d.rel==='pos'?' active-pos':'');
+            document.getElementById('item-btn-neg').className='rel-btn'+(d.rel==='neg'?' active-neg':'');
+            buildItemAxis(d.rel,d.t[0],d.t[1]);break;}}
+  };
+  document.getElementById('itemModalOverlay').classList.add('open');
+}
+
+// 새 지표 추가
+function openAddItemModal(groupKey){
+  itemModalId=null;itemModalGroupKey=groupKey;
+  document.getElementById('itemModalTitle').textContent='지표 추가';
+  document.getElementById('inp-fredid').value='';
+  document.getElementById('inp-fredid').disabled=false;
+  document.getElementById('inp-unit').value='%';
+  document.getElementById('inp-title').value='';
+  document.getElementById('inp-symbol').value='';
+  document.getElementById('inp-mode').value='level';
+  itemModalRel='neg';
+  document.getElementById('item-btn-pos').className='rel-btn';
+  document.getElementById('item-btn-neg').className='rel-btn active-neg';
+  buildItemAxis('neg',0,1);
+  document.getElementById('btnDeleteItem').style.display='none';
+  document.getElementById('btnResetItem').style.display='none';
+  document.getElementById('btnApplyItem').textContent='추가';
+  document.getElementById('itemModalOverlay').classList.add('open');
+}
+
+function applyItemModal(){
+  const fredid=(document.getElementById('inp-fredid').value||'').trim().toUpperCase();
+  const title=(document.getElementById('inp-title').value||'').trim()||fredid;
+  const symbol=(document.getElementById('inp-symbol').value||'').trim()||fredid;
+  const unit=document.getElementById('inp-unit').value||'';
+  const mode=document.getElementById('inp-mode').value||'level';
   const v0=parseFloat(document.getElementById('th-inp-0').value);
   const v1=parseFloat(document.getElementById('th-inp-1').value);
-  if(isNaN(v0)||isNaN(v1))return;
-  T[modalId].t=[v0,v1];saveT();
-  if(cachedData)renderAll(cachedData);
-  closeModalDirect();
-  const tm=document.getElementById('toast');tm.classList.add('show');setTimeout(()=>tm.classList.remove('show'),1500);
+  if(!fredid||isNaN(v0)||isNaN(v1))return;
+
+  if(itemModalId){
+    // 편집 모드
+    const found=findItem(itemModalId);if(!found)return;
+    Object.assign(found.item,{title,symbol,unit,mode,rel:itemModalRel,t:[v0,v1]});
+    // 카드 레이블 업데이트
+    const tEl=document.getElementById('lbl-title-'+itemModalId);
+    const sEl=document.getElementById('lbl-sym-'+itemModalId);
+    const bEl=document.getElementById('lbl-badge-'+itemModalId);
+    if(tEl)tEl.textContent=title;
+    if(sEl)sEl.textContent=symbol+' · '+(FRED_NAME[itemModalId]||itemModalId);
+    if(bEl)bEl.textContent=itemModalRel==='pos'?'비례':'반비례';
+    if(cachedData)renderCard(found.item,cachedData[itemModalId]||[]);
+  }else{
+    // 추가 모드
+    if(findItem(fredid)){alert('이미 존재하는 FRED ID입니다.');return;}
+    const g=groups.find(g=>g.key===itemModalGroupKey);if(!g)return;
+    const newItem={id:fredid,title,symbol,unit,mode,rel:itemModalRel,t:[v0,v1]};
+    g.items.push(newItem);
+    // 그리드에 카드 추가
+    const grid=document.getElementById('grid-'+itemModalGroupKey);
+    if(grid){grid.appendChild(buildCard(newItem));
+      if(cachedData)renderCard(newItem,cachedData[fredid]||[]);}
+  }
+  saveGroups();
+  closeItemModalDirect();
+  showToast();
 }
 
-function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect();}
-function closeModalDirect(){document.getElementById('modalOverlay').classList.remove('open');modalId=null;}
+function deleteItem(){
+  if(!itemModalId)return;
+  if(!confirm('"'+itemModalId+'" 지표를 삭제하시겠습니까?'))return;
+  for(const g of groups){
+    const idx=g.items.findIndex(i=>i.id===itemModalId);
+    if(idx>=0){g.items.splice(idx,1);break;}
+  }
+  const card=document.getElementById('card-'+itemModalId);
+  if(card)card.remove();
+  if(charts[itemModalId]){charts[itemModalId].destroy();delete charts[itemModalId];}
+  saveGroups();closeItemModalDirect();showToast();
+}
+
+function closeItemModal(e){if(e.target===document.getElementById('itemModalOverlay'))closeItemModalDirect();}
+function closeItemModalDirect(){document.getElementById('itemModalOverlay').classList.remove('open');itemModalId=null;}
+
+// ══════════════════════════════════════════════════════
+// 그룹 추가 모달
+// ══════════════════════════════════════════════════════
+function openGroupModal(){
+  document.getElementById('grp-name').value='';
+  document.getElementById('grp-desc').value='';
+  document.getElementById('groupModalOverlay').classList.add('open');
+}
+
+function applyGroupModal(){
+  const name=(document.getElementById('grp-name').value||'').trim();
+  const desc=(document.getElementById('grp-desc').value||'').trim()||name;
+  if(!name)return;
+  const key='G'+Date.now().toString(36).slice(-3).toUpperCase();
+  const newGroup={key,name,desc,items:[]};
+  groups.push(newGroup);
+  // 섹션 추가 (그룹 추가 버튼 앞에 삽입)
+  const addRow=document.querySelector('.add-group-row');
+  const sec=document.createElement('div');sec.className='section';sec.id='sec-'+key;
+  sec.innerHTML=
+    '<div class="section-header">'+
+      '<span class="section-label">'+key+'</span>'+
+      '<span class="section-title">'+name+'</span>'+
+      '<span class="section-desc">· '+desc+'</span>'+
+      '<button class="add-item-btn" title="지표 추가" onclick="openAddItemModal(\''+key+'\')">+</button>'+
+    '</div>'+
+    '<div class="grid" id="grid-'+key+'"></div>';
+  addRow.parentNode.insertBefore(sec,addRow);
+  saveGroups();closeGroupModalDirect();showToast();
+}
+
+function closeGroupModal(e){if(e.target===document.getElementById('groupModalOverlay'))closeGroupModalDirect();}
+function closeGroupModalDirect(){document.getElementById('groupModalOverlay').classList.remove('open');}
+
+function showToast(){const tm=document.getElementById('toast');tm.classList.add('show');setTimeout(()=>tm.classList.remove('show'),1500);}
 
 buildDashboard();loadAll();
 </script>
