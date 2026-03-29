@@ -82,6 +82,19 @@ h1{font-size:1.3rem;font-weight:700}
 .btn-apply{font-size:.78rem;font-weight:600;color:#fff;background:#1a1a1a;border:none;padding:7px 20px;border-radius:6px;cursor:pointer;margin-left:auto}
 .btn-apply:hover{background:#333}
 .divider{border:none;border-top:1px solid #f0f0f0;margin:14px 0}
+.config-btn{background:#fff;border:1px solid #e0e0e0;color:#555;padding:5px 11px;border-radius:6px;cursor:pointer;font-size:.78rem;margin-top:4px;transition:background .15s}
+.config-btn:hover{background:#f0f0f0}
+.config-panel{display:none;background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:14px;margin-bottom:14px}
+.config-panel.open{display:block}
+.config-panel-header{font-size:.78rem;font-weight:600;color:#555;margin-bottom:8px}
+.config-panel-desc{font-size:.7rem;color:#aaa;margin-bottom:10px;line-height:1.5}
+.config-textarea{width:100%;height:80px;padding:9px 10px;border:1px solid #e0e0e0;border-radius:7px;font-size:.72rem;font-family:monospace;color:#333;resize:vertical;line-height:1.5}
+.config-textarea:focus{outline:none;border-color:#888}
+.config-btn-row{display:flex;gap:8px;margin-top:8px}
+.config-action-btn{padding:6px 14px;border-radius:6px;font-size:.76rem;font-weight:600;cursor:pointer;border:1px solid #e0e0e0;background:#f8f8f8;color:#555;transition:background .15s}
+.config-action-btn:hover{background:#e8e8e8}
+.config-action-btn.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.config-action-btn.primary:hover{background:#333}
 .save-toast{position:fixed;bottom:20px;right:20px;background:#1a1a1a;color:#fff;padding:8px 16px;border-radius:8px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
 .save-toast.show{opacity:1}
 @media(max-width:600px){.grid{grid-template-columns:1fr 1fr}}
@@ -92,9 +105,27 @@ h1{font-size:1.3rem;font-weight:700}
 <header>
   <div><h1>📊 경제지표 대시보드</h1>
   <div class="subtitle">Federal Reserve Economic Data (FRED) — 미국 주요 경제지표</div></div>
-  <div><div class="last-update" id="lastUpdate">로딩 중...</div>
-  <button class="refresh-btn" onclick="reloadDash()">↻ 새로고침</button></div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+    <div class="last-update" id="lastUpdate">로딩 중...</div>
+    <div style="display:flex;gap:6px">
+      <button class="config-btn" onclick="toggleConfigPanel()">⚙ 설정 입력</button>
+      <button class="refresh-btn" onclick="reloadDash()">↻ 새로고침</button>
+    </div>
+  </div>
 </header>
+
+<!-- 설정 텍스트 패널 -->
+<div class="config-panel" id="configPanel">
+  <div class="config-panel-header">설정 코드</div>
+  <div class="config-panel-desc">아래 텍스트를 복사해 두면 다른 기기에서 붙여넣기만으로 동일한 설정을 적용할 수 있습니다.</div>
+  <textarea class="config-textarea" id="configTextarea" placeholder="설정 코드를 붙여넣으세요..."></textarea>
+  <div class="config-btn-row">
+    <button class="config-action-btn" onclick="copyConfig()">📋 복사</button>
+    <button class="config-action-btn" onclick="pasteConfig()">📥 붙여넣기</button>
+    <button class="config-action-btn primary" onclick="applyConfigText()" style="margin-left:auto">적용</button>
+  </div>
+</div>
+
 <div class="status-bar">
   <span id="statusDot"><span class="dot" style="background:#ccc"></span>데이터 로딩 중...</span>
   <span><span class="dot" style="background:#9e9e9e"></span>출처: FRED</span>
@@ -223,7 +254,48 @@ function loadGroups(){
     return s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT_GROUPS));}
   catch(e){return JSON.parse(JSON.stringify(DEFAULT_GROUPS));}
 }
-function saveGroups(){localStorage.setItem('eco_groups',JSON.stringify(groups));}
+function saveGroups(){
+  localStorage.setItem('eco_groups',JSON.stringify(groups));
+  updateConfigTextarea();
+}
+
+// ── 설정 텍스트 패널 ──
+function serializeConfig(){return JSON.stringify(groups);}
+function updateConfigTextarea(){
+  const ta=document.getElementById('configTextarea');
+  if(ta)ta.value=serializeConfig();
+}
+function toggleConfigPanel(){
+  const p=document.getElementById('configPanel');
+  if(p.classList.toggle('open'))updateConfigTextarea();
+}
+async function copyConfig(){
+  try{
+    await navigator.clipboard.writeText(document.getElementById('configTextarea').value);
+    showToast('✓ 복사됨');
+  }catch(e){showToast('⚠ 복사 실패 — 텍스트를 직접 선택해 복사하세요');}
+}
+async function pasteConfig(){
+  try{
+    const text=await navigator.clipboard.readText();
+    document.getElementById('configTextarea').value=text;
+    applyConfigText();
+  }catch(e){showToast('⚠ 클립보드 접근 실패 — 직접 붙여넣기 후 적용을 눌러주세요');}
+}
+function applyConfigText(){
+  const text=(document.getElementById('configTextarea').value||'').trim();
+  if(!text)return;
+  try{
+    const parsed=JSON.parse(text);
+    if(!Array.isArray(parsed)||!parsed.length)throw new Error();
+    for(const g of parsed){if(!g.key||!g.name||!Array.isArray(g.items))throw new Error();}
+    groups=parsed;
+    localStorage.setItem('eco_groups',JSON.stringify(groups));
+    buildDashboard();
+    if(cachedData)renderAll(cachedData);
+    showToast('✓ 설정 적용됨');
+  }catch(e){showToast('⚠ 유효하지 않은 설정 코드입니다');}
+}
 let groups=loadGroups();
 
 // item 찾기
