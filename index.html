@@ -150,8 +150,8 @@ h1{font-size:1.3rem;font-weight:700}
     </div>
     <div class="field-row">
       <div class="field grow">
-        <div class="field-label">FRED ID</div>
-        <input class="field-input" type="text" id="inp-fredid" placeholder="예: DGS10">
+        <div class="field-label">심볼 (FRED ID) — 변경 시 데이터도 바뀜</div>
+        <input class="field-input" type="text" id="inp-symbol" placeholder="예: DGS10">
       </div>
       <div class="field" style="width:80px">
         <div class="field-label">단위</div>
@@ -162,10 +162,6 @@ h1{font-size:1.3rem;font-weight:700}
       <div class="field grow">
         <div class="field-label">제목</div>
         <input class="field-input" type="text" id="inp-title" placeholder="표시할 이름">
-      </div>
-      <div class="field" style="width:100px">
-        <div class="field-label">심볼</div>
-        <input class="field-input" type="text" id="inp-symbol" placeholder="코드">
       </div>
     </div>
     <div class="field-row">
@@ -226,8 +222,8 @@ h1{font-size:1.3rem;font-weight:700}
 const DEFAULT_GROUPS=[
   {key:'L',name:'유동성',desc:'Liquidity',items:[
     {id:'FEDFUNDS',title:'정책금리',   symbol:'FFR',   unit:'%',   mode:'level',rel:'neg',t:[3.0,4.5]},
-    {id:'DFII10',  title:'실질금리 10Y',symbol:'TIPS',  unit:'%',   mode:'level',rel:'neg',t:[0.5,1.5]},
-    {id:'DGS10',   title:'국채금리 10Y',symbol:'UST10', unit:'%',   mode:'level',rel:'neg',t:[3.5,4.5]},
+    {id:'DFII10',  title:'실질금리 10Y',  unit:'%',   mode:'level',rel:'neg',t:[0.5,1.5]},
+    {id:'DGS10',   title:'국채금리 10Y', unit:'%',   mode:'level',rel:'neg',t:[3.5,4.5]},
     {id:'T10Y2Y',  title:'수익률곡선', symbol:'2s10s', unit:'%',   mode:'level',rel:'pos',t:[0.0,0.5]},
   ]},
   {key:'G',name:'성장',desc:'Growth',items:[
@@ -242,7 +238,7 @@ const DEFAULT_GROUPS=[
     {id:'CPIAUCSL',title:'CPI',        symbol:'CPI',   unit:'',    mode:'yoy',  rel:'neg',t:[3.0,4.0]},
   ]},
   {key:'R',name:'위험',desc:'Risk',items:[
-    {id:'BAMLH0A0HYM2',title:'하이일드 스프레드',symbol:'HY',unit:'%',mode:'level',rel:'neg',t:[3.5,5.0]},
+    {id:'BAMLH0A0HYM2',title:'하이일드 스프레드',unit:'%',mode:'level',rel:'neg',t:[3.5,5.0]},
   ]},
 ];
 
@@ -379,7 +375,8 @@ function fmt(v,u){if(v===null||v===undefined||isNaN(parseFloat(v)))return'N/A';c
 function buildCard(item){
   const div=document.createElement('div');div.className='card';div.id='card-'+item.id;
   const badge=item.rel==='pos'?'비례':'반비례';
-  const fredSub=FRED_NAME[item.id]||item.id;
+  const fredSub=FRED_NAME[item.id];
+  const symLine=fredSub?item.id+' · '+fredSub:item.id;
   const fredUrl='https://fred.stlouisfed.org/series/'+item.id;
   div.innerHTML=
     '<div class="card-header">'+
@@ -387,7 +384,7 @@ function buildCard(item){
         '<div class="card-name" id="lbl-title-'+item.id+'">'+
           '<a class="card-name-link" href="'+fredUrl+'" target="_blank" rel="noopener noreferrer">'+item.title+'</a>'+
         '</div>'+
-        '<div class="card-symbol" id="lbl-sym-'+item.id+'">'+item.symbol+' · '+fredSub+'</div>'+
+        '<div class="card-symbol" id="lbl-sym-'+item.id+'">'+symLine+'</div>'+
       '</div>'+
       '<div class="card-meta">'+
         '<span class="badge" id="lbl-badge-'+item.id+'">'+badge+'</span>'+
@@ -524,11 +521,9 @@ function openItemModal(e,id){
   const found=findItem(id);if(!found)return;
   const item=found.item;
   document.getElementById('itemModalTitle').textContent='설정 — '+item.title;
-  document.getElementById('inp-fredid').value=item.id;
-  document.getElementById('inp-fredid').disabled=true;
+  document.getElementById('inp-symbol').value=item.id;
   document.getElementById('inp-unit').value=item.unit||'';
   document.getElementById('inp-title').value=item.title;
-  document.getElementById('inp-symbol').value=item.symbol;
   document.getElementById('inp-mode').value=item.mode||'level';
   itemModalRel=item.rel||'neg';
   document.getElementById('item-btn-pos').className='rel-btn'+(itemModalRel==='pos'?' active-pos':'');
@@ -538,10 +533,9 @@ function openItemModal(e,id){
   document.getElementById('btnResetItem').style.display='';
   document.getElementById('btnApplyItem').textContent='적용';
   document.getElementById('btnResetItem').onclick=()=>{
-    // DEFAULT_GROUPS에서 원본 찾기
     for(const g of DEFAULT_GROUPS){const d=g.items.find(i=>i.id===id);
-      if(d){document.getElementById('inp-title').value=d.title;
-            document.getElementById('inp-symbol').value=d.symbol;
+      if(d){document.getElementById('inp-symbol').value=d.id;
+            document.getElementById('inp-title').value=d.title;
             document.getElementById('inp-unit').value=d.unit||'';
             document.getElementById('inp-mode').value=d.mode||'level';
             itemModalRel=d.rel;
@@ -556,11 +550,9 @@ function openItemModal(e,id){
 function openAddItemModal(groupKey){
   itemModalId=null;itemModalGroupKey=groupKey;
   document.getElementById('itemModalTitle').textContent='지표 추가';
-  document.getElementById('inp-fredid').value='';
-  document.getElementById('inp-fredid').disabled=false;
+  document.getElementById('inp-symbol').value='';
   document.getElementById('inp-unit').value='%';
   document.getElementById('inp-title').value='';
-  document.getElementById('inp-symbol').value='';
   document.getElementById('inp-mode').value='level';
   itemModalRel='neg';
   document.getElementById('item-btn-pos').className='rel-btn';
@@ -573,41 +565,56 @@ function openAddItemModal(groupKey){
 }
 
 function applyItemModal(){
-  const fredid=(document.getElementById('inp-fredid').value||'').trim().toUpperCase();
-  const title=(document.getElementById('inp-title').value||'').trim()||fredid;
-  const symbol=(document.getElementById('inp-symbol').value||'').trim()||fredid;
+  const newId=(document.getElementById('inp-symbol').value||'').trim().toUpperCase();
+  const title=(document.getElementById('inp-title').value||'').trim()||newId;
   const unit=document.getElementById('inp-unit').value||'';
   const mode=document.getElementById('inp-mode').value||'level';
   const v0=parseFloat(document.getElementById('th-inp-0').value);
   const v1=parseFloat(document.getElementById('th-inp-1').value);
-  if(!fredid||isNaN(v0)||isNaN(v1))return;
+  if(!newId||isNaN(v0)||isNaN(v1))return;
 
   if(itemModalId){
     // 편집 모드
     const found=findItem(itemModalId);if(!found)return;
-    Object.assign(found.item,{title,symbol,unit,mode,rel:itemModalRel,t:[v0,v1]});
-    // 카드 레이블 업데이트
-    const tEl=document.getElementById('lbl-title-'+itemModalId);
-    const sEl=document.getElementById('lbl-sym-'+itemModalId);
-    const bEl=document.getElementById('lbl-badge-'+itemModalId);
-    if(tEl)tEl.innerHTML='<a class="card-name-link" href="https://fred.stlouisfed.org/series/'+itemModalId+'" target="_blank" rel="noopener noreferrer">'+title+'</a>';
-    if(sEl)sEl.textContent=symbol+' · '+(FRED_NAME[itemModalId]||itemModalId);
-    if(bEl)bEl.textContent=itemModalRel==='pos'?'비례':'반비례';
-    if(cachedData)renderCard(found.item,cachedData[itemModalId]||[]);
+    const oldId=itemModalId;
+    const idChanged=(newId!==oldId);
+    if(idChanged&&findItem(newId)){alert('이미 존재하는 심볼(ID)입니다.');return;}
+
+    // 공통 필드 업데이트
+    Object.assign(found.item,{id:newId,title,unit,mode,rel:itemModalRel,t:[v0,v1]});
+
+    if(idChanged){
+      // 심볼(ID) 변경 → 카드 교체
+      if(charts[oldId]){try{charts[oldId].destroy();}catch(e){}delete charts[oldId];}
+      const oldCard=document.getElementById('card-'+oldId);
+      const newCard=buildCard(found.item);
+      if(oldCard)oldCard.replaceWith(newCard);
+      else{const grid=document.getElementById('grid-'+found.group.key);if(grid)grid.appendChild(newCard);}
+      if(cachedData)renderCard(found.item,cachedData[newId]||[]);
+    }else{
+      // 동일 ID → 레이블만 업데이트
+      const fredSub=FRED_NAME[newId];
+      const tEl=document.getElementById('lbl-title-'+oldId);
+      const sEl=document.getElementById('lbl-sym-'+oldId);
+      const bEl=document.getElementById('lbl-badge-'+oldId);
+      if(tEl)tEl.innerHTML='<a class="card-name-link" href="https://fred.stlouisfed.org/series/'+newId+'" target="_blank" rel="noopener noreferrer">'+title+'</a>';
+      if(sEl)sEl.textContent=fredSub?newId+' · '+fredSub:newId;
+      if(bEl)bEl.textContent=itemModalRel==='pos'?'비례':'반비례';
+      if(cachedData)renderCard(found.item,cachedData[oldId]||[]);
+    }
   }else{
     // 추가 모드
-    if(findItem(fredid)){alert('이미 존재하는 FRED ID입니다.');return;}
+    if(findItem(newId)){alert('이미 존재하는 심볼(ID)입니다.');return;}
     const g=groups.find(g=>g.key===itemModalGroupKey);if(!g)return;
-    const newItem={id:fredid,title,symbol,unit,mode,rel:itemModalRel,t:[v0,v1]};
+    const newItem={id:newId,title,unit,mode,rel:itemModalRel,t:[v0,v1]};
     g.items.push(newItem);
-    // 그리드에 카드 추가
     const grid=document.getElementById('grid-'+itemModalGroupKey);
     if(grid){grid.appendChild(buildCard(newItem));
-      if(cachedData)renderCard(newItem,cachedData[fredid]||[]);}
+      if(cachedData)renderCard(newItem,cachedData[newId]||[]);}
   }
   saveGroups();
   closeItemModalDirect();
-  showToast();
+  showToast('✓ 저장됨');
 }
 
 function deleteItem(){
