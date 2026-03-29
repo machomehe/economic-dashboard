@@ -23,6 +23,10 @@ h1{font-size:1.3rem;font-weight:700}
 .section-desc{font-size:.72rem;color:#888;flex:1}
 .add-item-btn{background:none;border:1.5px solid #ccc;color:#aaa;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s}
 .add-item-btn:hover{border-color:#555;color:#555}
+.del-group-btn{background:none;border:none;color:#ddd;width:22px;height:22px;border-radius:5px;cursor:pointer;font-size:.9rem;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s}
+.del-group-btn:hover{color:#e53935}
+.card-name-link{color:inherit;text-decoration:none}
+.card-name-link:hover{text-decoration:underline;color:#555}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
 .card{background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;text-decoration:none;display:block;color:inherit;position:relative}
 .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
@@ -107,7 +111,9 @@ h1{font-size:1.3rem;font-weight:700}
   <div class="subtitle">Federal Reserve Economic Data (FRED) — 미국 주요 경제지표</div></div>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
     <div class="last-update" id="lastUpdate">로딩 중...</div>
-    <div style="display:flex;gap:6px">
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="config-btn" onclick="copyConfig()" title="설정 복사">📋</button>
+      <button class="config-btn" onclick="pasteConfig()" title="설정 붙여넣기">📥</button>
       <button class="config-btn" onclick="toggleConfigPanel()">⚙ 설정 입력</button>
       <button class="refresh-btn" onclick="reloadDash()">↻ 새로고침</button>
     </div>
@@ -284,17 +290,17 @@ async function pasteConfig(){
 }
 function applyConfigText(){
   const text=(document.getElementById('configTextarea').value||'').trim();
-  if(!text)return;
-  try{
-    const parsed=JSON.parse(text);
-    if(!Array.isArray(parsed)||!parsed.length)throw new Error();
-    for(const g of parsed){if(!g.key||!g.name||!Array.isArray(g.items))throw new Error();}
-    groups=parsed;
-    localStorage.setItem('eco_groups',JSON.stringify(groups));
-    buildDashboard();
-    if(cachedData)renderAll(cachedData);
-    showToast('✓ 설정 적용됨');
-  }catch(e){showToast('⚠ 유효하지 않은 설정 코드입니다');}
+  if(!text){showToast('⚠ 텍스트를 입력해주세요');return;}
+  let parsed;
+  try{parsed=JSON.parse(text);}catch(e){showToast('⚠ 형식 오류 — 올바른 설정 코드인지 확인해주세요');return;}
+  if(!Array.isArray(parsed)||!parsed.length){showToast('⚠ 유효하지 않은 설정 코드');return;}
+  for(const g of parsed){if(!g.key||!g.name||!Array.isArray(g.items)){showToast('⚠ 유효하지 않은 설정 코드');return;}}
+  groups=parsed;
+  localStorage.setItem('eco_groups',JSON.stringify(groups));
+  buildDashboard();
+  if(cachedData)renderAll(cachedData);
+  updateConfigTextarea();
+  showToast('✓ 설정 적용됨');
 }
 let groups=loadGroups();
 
@@ -371,14 +377,16 @@ function fmt(v,u){if(v===null||v===undefined||isNaN(parseFloat(v)))return'N/A';c
 
 // ── 카드 빌드/렌더 ──
 function buildCard(item){
-  const a=document.createElement('a');a.className='card';a.id='card-'+item.id;
-  a.href='https://fred.stlouisfed.org/series/'+item.id;a.target='_blank';a.rel='noopener noreferrer';
+  const div=document.createElement('div');div.className='card';div.id='card-'+item.id;
   const badge=item.rel==='pos'?'비례':'반비례';
   const fredSub=FRED_NAME[item.id]||item.id;
-  a.innerHTML=
+  const fredUrl='https://fred.stlouisfed.org/series/'+item.id;
+  div.innerHTML=
     '<div class="card-header">'+
       '<div>'+
-        '<div class="card-name" id="lbl-title-'+item.id+'">'+item.title+'</div>'+
+        '<div class="card-name" id="lbl-title-'+item.id+'">'+
+          '<a class="card-name-link" href="'+fredUrl+'" target="_blank" rel="noopener noreferrer">'+item.title+'</a>'+
+        '</div>'+
         '<div class="card-symbol" id="lbl-sym-'+item.id+'">'+item.symbol+' · '+fredSub+'</div>'+
       '</div>'+
       '<div class="card-meta">'+
@@ -389,7 +397,7 @@ function buildCard(item){
     '<div class="card-value-row"><div class="card-value" id="val-'+item.id+'"><span style="color:#aaa;font-size:.8rem">—</span></div><div class="card-latest-date" id="date-'+item.id+'"></div></div>'+
     '<div class="card-change" id="chg-'+item.id+'"></div>'+
     '<div class="chart-wrap"><canvas id="chart-'+item.id+'"></canvas></div>';
-  return a;
+  return div;
 }
 
 function renderCard(item,obs){
@@ -431,6 +439,7 @@ function renderAll(data){
 }
 
 function buildDashboard(){
+  Object.keys(charts).forEach(k=>{try{charts[k].destroy();}catch(e){}delete charts[k];});
   const dash=document.getElementById('dashboard');dash.innerHTML='';
   groups.forEach(g=>{
     const sec=document.createElement('div');sec.className='section';sec.id='sec-'+g.key;
@@ -440,6 +449,7 @@ function buildDashboard(){
         '<span class="section-title">'+g.name+'</span>'+
         '<span class="section-desc">· '+g.desc+'</span>'+
         '<button class="add-item-btn" title="지표 추가" onclick="openAddItemModal(\''+g.key+'\')">+</button>'+
+        '<button class="del-group-btn" title="그룹 삭제" onclick="deleteGroup(\''+g.key+'\')">×</button>'+
       '</div>'+
       '<div class="grid" id="grid-'+g.key+'"></div>';
     dash.appendChild(sec);
@@ -580,7 +590,7 @@ function applyItemModal(){
     const tEl=document.getElementById('lbl-title-'+itemModalId);
     const sEl=document.getElementById('lbl-sym-'+itemModalId);
     const bEl=document.getElementById('lbl-badge-'+itemModalId);
-    if(tEl)tEl.textContent=title;
+    if(tEl)tEl.innerHTML='<a class="card-name-link" href="https://fred.stlouisfed.org/series/'+itemModalId+'" target="_blank" rel="noopener noreferrer">'+title+'</a>';
     if(sEl)sEl.textContent=symbol+' · '+(FRED_NAME[itemModalId]||itemModalId);
     if(bEl)bEl.textContent=itemModalRel==='pos'?'비례':'반비례';
     if(cachedData)renderCard(found.item,cachedData[itemModalId]||[]);
@@ -610,11 +620,24 @@ function deleteItem(){
   const card=document.getElementById('card-'+itemModalId);
   if(card)card.remove();
   if(charts[itemModalId]){charts[itemModalId].destroy();delete charts[itemModalId];}
-  saveGroups();closeItemModalDirect();showToast();
+  saveGroups();closeItemModalDirect();showToast('✓ 저장됨');
 }
 
 function closeItemModal(e){if(e.target===document.getElementById('itemModalOverlay'))closeItemModalDirect();}
 function closeItemModalDirect(){document.getElementById('itemModalOverlay').classList.remove('open');itemModalId=null;}
+
+// ── 그룹 삭제 ──
+function deleteGroup(key){
+  const g=groups.find(g=>g.key===key);if(!g)return;
+  const msg=g.items.length>0
+    ?'"'+g.name+'" 그룹과 지표 '+g.items.length+'개를 삭제하시겠습니까?'
+    :'"'+g.name+'" 그룹을 삭제하시겠습니까?';
+  if(!confirm(msg))return;
+  g.items.forEach(item=>{try{if(charts[item.id]){charts[item.id].destroy();delete charts[item.id];}}catch(e){}});
+  groups=groups.filter(g=>g.key!==key);
+  const sec=document.getElementById('sec-'+key);if(sec)sec.remove();
+  saveGroups();showToast('✓ 그룹 삭제됨');
+}
 
 // ══════════════════════════════════════════════════════
 // 그룹 추가 모달
@@ -641,16 +664,17 @@ function applyGroupModal(){
       '<span class="section-title">'+name+'</span>'+
       '<span class="section-desc">· '+desc+'</span>'+
       '<button class="add-item-btn" title="지표 추가" onclick="openAddItemModal(\''+key+'\')">+</button>'+
+      '<button class="del-group-btn" title="그룹 삭제" onclick="deleteGroup(\''+key+'\')">×</button>'+
     '</div>'+
     '<div class="grid" id="grid-'+key+'"></div>';
   addRow.parentNode.insertBefore(sec,addRow);
-  saveGroups();closeGroupModalDirect();showToast();
+  saveGroups();closeGroupModalDirect();showToast('✓ 저장됨');
 }
 
 function closeGroupModal(e){if(e.target===document.getElementById('groupModalOverlay'))closeGroupModalDirect();}
 function closeGroupModalDirect(){document.getElementById('groupModalOverlay').classList.remove('open');}
 
-function showToast(){const tm=document.getElementById('toast');tm.classList.add('show');setTimeout(()=>tm.classList.remove('show'),1500);}
+function showToast(msg){const tm=document.getElementById('toast');tm.textContent=msg||'✓ 저장됨';tm.classList.add('show');setTimeout(()=>tm.classList.remove('show'),2000);}
 
 buildDashboard();loadAll();
 </script>
