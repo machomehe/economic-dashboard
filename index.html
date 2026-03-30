@@ -150,8 +150,9 @@ h1{font-size:1.3rem;font-weight:700}
     </div>
     <div class="field-row">
       <div class="field grow">
-        <div class="field-label">심볼 (FRED ID) — 변경 시 데이터도 바뀜</div>
-        <input class="field-input" type="text" id="inp-symbol" placeholder="예: DGS10">
+        <div class="field-label">심볼 (FRED ID)</div>
+        <input class="field-input" type="text" id="inp-symbol" placeholder="예: DGS10" oninput="onSymbolInput(this.value)">
+        <div id="fredPreview" style="font-size:.7rem;margin-top:5px;min-height:16px;line-height:1.4"></div>
       </div>
       <div class="field" style="width:80px">
         <div class="field-label">단위</div>
@@ -485,6 +486,19 @@ function itemSetRel(rel){
     parseFloat(document.getElementById('th-inp-1').value)||1);
 }
 
+function onSymbolInput(raw){
+  const sym=(raw||'').trim().toUpperCase();
+  const el=document.getElementById('fredPreview');
+  if(!el)return;
+  if(!sym){el.innerHTML='';return;}
+  const name=FRED_NAME[sym];
+  if(name){
+    el.innerHTML='<span style="color:#27ae60">✓ '+name+'</span>';
+  }else{
+    el.innerHTML='<a href="https://fred.stlouisfed.org/series/'+sym+'" target="_blank" rel="noopener noreferrer" style="color:#aaa;text-decoration:underline">FRED에서 확인 →</a>';
+  }
+}
+
 function buildItemAxis(rel,t0,t1){
   const gc='#27ae60',nc='#9e9e9e',bc='#e53935';
   const lc=rel==='pos'?bc:gc,rc=rel==='pos'?gc:bc;
@@ -522,6 +536,7 @@ function openItemModal(e,id){
   const item=found.item;
   document.getElementById('itemModalTitle').textContent='설정 — '+item.title;
   document.getElementById('inp-symbol').value=item.id;
+  onSymbolInput(item.id);
   document.getElementById('inp-unit').value=item.unit||'';
   document.getElementById('inp-title').value=item.title;
   document.getElementById('inp-mode').value=item.mode||'level';
@@ -551,6 +566,7 @@ function openAddItemModal(groupKey){
   itemModalId=null;itemModalGroupKey=groupKey;
   document.getElementById('itemModalTitle').textContent='지표 추가';
   document.getElementById('inp-symbol').value='';
+  onSymbolInput('');
   document.getElementById('inp-unit').value='%';
   document.getElementById('inp-title').value='';
   document.getElementById('inp-mode').value='level';
