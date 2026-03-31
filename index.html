@@ -123,12 +123,7 @@ h1{font-size:1.3rem;font-weight:700}
 <!-- 설정 텍스트 패널 -->
 <div class="config-panel" id="configPanel">
   <div class="config-panel-header">설정 코드</div>
-  <div class="config-panel-desc">아래 텍스트를 복사해 두면 다른 기기에서 붙여넣기만으로 동일한 설정을 적용할 수 있습니다. API 키도 포함되므로 타인과 공유하지 마세요.</div>
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-    <span style="font-size:.75rem;color:#555;white-space:nowrap">FRED API 키</span>
-    <input type="password" id="apiKeyInput" placeholder="API 키 입력 (저장됨)" style="flex:1;padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:.78rem">
-    <button class="config-action-btn" onclick="saveApiKey()" style="white-space:nowrap">저장</button>
-  </div>
+  <div class="config-panel-desc">아래 텍스트를 복사해 두면 다른 기기에서 붙여넣기만으로 동일한 설정을 적용할 수 있습니다.</div>
   <textarea class="config-textarea" id="configTextarea" placeholder="설정 코드를 붙여넣으세요..."></textarea>
   <div class="config-btn-row">
     <button class="config-action-btn" onclick="copyConfig()">복사</button>
@@ -256,16 +251,6 @@ const FRED_NAME={
   T10YIE:'Breakeven Inflation 10Y',CPIAUCSL:'CPI All Urban',BAMLH0A0HYM2:'HY OAS Spread',
 };
 
-// ── API 키 관리 ──
-function loadApiKey(){return localStorage.getItem('fred_api_key')||'';}
-function saveApiKey(){
-  const v=(document.getElementById('apiKeyInput').value||'').trim();
-  if(!v){showToast('⚠ API 키를 입력해주세요');return;}
-  localStorage.setItem('fred_api_key',v);
-  updateConfigTextarea();
-  showToast('✓ API 키 저장됨');
-}
-
 // ── 상태 로드/저장 ──
 function loadGroups(){
   try{const s=localStorage.getItem('eco_groups');
@@ -278,15 +263,10 @@ function saveGroups(){
 }
 
 // ── 설정 텍스트 패널 ──
-function serializeConfig(){
-  const apiKey=loadApiKey();
-  return JSON.stringify({apiKey:apiKey||'',groups:groups},null,0);
-}
+function serializeConfig(){return JSON.stringify(groups);}
 function updateConfigTextarea(){
   const ta=document.getElementById('configTextarea');
   if(ta)ta.value=serializeConfig();
-  const ki=document.getElementById('apiKeyInput');
-  if(ki&&!ki.value){const k=loadApiKey();if(k)ki.placeholder='저장됨 ('+k.slice(0,4)+'…'+k.slice(-4)+')';}
 }
 function toggleConfigPanel(){
   const p=document.getElementById('configPanel');
@@ -310,24 +290,15 @@ function applyConfigText(){
   if(!text){showToast('⚠ 텍스트를 입력해주세요');return;}
   let parsed;
   try{parsed=JSON.parse(text);}catch(e){showToast('⚠ 형식 오류 — 올바른 설정 코드인지 확인해주세요');return;}
-  // 새 형식: {apiKey, groups} / 구 형식: 배열
-  let newGroups,newApiKey=null;
-  if(Array.isArray(parsed)){
-    newGroups=parsed;
-  }else if(parsed&&Array.isArray(parsed.groups)){
-    newGroups=parsed.groups;
-    newApiKey=parsed.apiKey||null;
-  }else{showToast('⚠ 유효하지 않은 설정 코드');return;}
-  if(!newGroups.length){showToast('⚠ 유효하지 않은 설정 코드');return;}
-  for(const g of newGroups){if(!g.key||!g.name||!Array.isArray(g.items)){showToast('⚠ 유효하지 않은 설정 코드');return;}}
-  if(newApiKey){localStorage.setItem('fred_api_key',newApiKey);}
-  groups=newGroups;
+  if(!Array.isArray(parsed)||!parsed.length){showToast('⚠ 유효하지 않은 설정 코드');return;}
+  for(const g of parsed){if(!g.key||!g.name||!Array.isArray(g.items)){showToast('⚠ 유효하지 않은 설정 코드');return;}}
+  groups=parsed;
   localStorage.setItem('eco_groups',JSON.stringify(groups));
   Object.keys(charts).forEach(k=>{try{charts[k].destroy();}catch(e){}delete charts[k];});
   buildDashboard();
   if(cachedData)renderAll(cachedData);
   updateConfigTextarea();
-  showToast('✓ 설정 적용됨'+(newApiKey?' (API 키 포함)':''));
+  showToast('✓ 설정 적용됨');
 }
 let groups=loadGroups();
 
