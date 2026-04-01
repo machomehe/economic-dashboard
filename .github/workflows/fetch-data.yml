@@ -25,13 +25,13 @@ jobs:
 
           indicators = [
             # 유동성 (Liquidity)
-            'FEDFUNDS', 'DFII10', 'DGS10', 'DGS2', 'M2SL',
+            'FEDFUNDS', 'DFII10', 'DGS10', 'DGS2', 'M2SL', 'WALCL',
             # 성장 (Growth)
-            'A191RL1Q225SBEA', 'NAPM', 'DGORDER', 'INDPRO', 'PAYEMS', 'UNRATE',
+            'A191RL1Q225SBEA', 'NAPM', 'DGORDER', 'INDPRO', 'PAYEMS', 'UNRATE', 'ICSA',
             # 인플레이션 (Inflation)
             'CPILFESL', 'CPIAUCSL', 'PCEPILFE', 'T10YIE', 'DCOILWTICO',
             # 위험 (Risk)
-            'T10Y2Y', 'BAMLH0A0HYM2', 'BAMLC0A4CBBB',
+            'T10Y2Y', 'BAMLH0A0HYM2', 'BAMLC0A4CBBB', 'STLFSI4',
             # 시장심리 (Sentiment)
             'VIXCLS', 'DTWEXBGS',
             # 시장지표 (Market)
