@@ -454,7 +454,7 @@ function renderCard(item,obs){
     if(item.id==='PAYEMS')return ' '+c.parsed.y.toFixed(0)+'천명';
     return ' '+c.parsed.y.toFixed(2)+'%';
   }
-  return ' '+fmt(c.parsed.y,item.unit);}}}},zonePlugin:zoneCfg},
+  return ' '+fmt(c.parsed.y,item.unit);}}},zonePlugin:zoneCfg},
       scales:{
         x:{display:true,ticks:{color:tickColor(),font:{size:8},maxRotation:45,minRotation:30,
           callback:function(val,idx,ticks){var label=this.getLabelForValue(val);if(!label)return null;
