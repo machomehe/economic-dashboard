@@ -34,6 +34,8 @@ jobs:
             'T10Y2Y', 'BAMLH0A0HYM2', 'BAMLC0A4CBBB',
             # 시장심리 (Sentiment)
             'VIXCLS', 'DTWEXBGS',
+            # 시장지표 (Market)
+            'SP500', 'NASDAQCOM', 'DEXKOUS',
           ]
 
           def fetch_series(sid, retries=3):
