@@ -802,40 +802,31 @@ function detectPatterns(cr){
 }
 
 /* ========== RELEASE SCHEDULE ========== */
-var RELINFO={
-  CPIAUCSL:{n:'CPI',day:12},CPILFESL:{n:'코어CPI',day:12},PCEPILFE:{n:'Core PCE',day:28},
-  PAYEMS:{n:'비농업고용',day:5},UNRATE:{n:'실업률',day:5},NAPM:{n:'ISM PMI',day:2},
-  DGORDER:{n:'내구재주문',day:26},ICSA:{n:'실업수당청구',weekly:true},
-  A191RL1Q225SBEA:{n:'GDP',day:30,quarterly:true}
-};
+// 하드코딩 날짜 대신 "마지막 FRED 데이터 + 발표 주기" 기반으로 계산
+var REL_MONTHLY={CPIAUCSL:'CPI',CPILFESL:'코어CPI',PCEPILFE:'Core PCE',PAYEMS:'비농업고용',UNRATE:'실업률',NAPM:'ISM PMI',DGORDER:'내구재주문',INDPRO:'산업생산',M2SL:'M2'};
+var REL_WEEKLY={ICSA:'실업수당청구',WALCL:'연준자산'};
+var REL_QUARTERLY={A191RL1Q225SBEA:'GDP'};
 function renderReleaseBanner(data){
-  var today=new Date();
+  var today=new Date();today.setHours(0,0,0,0);
   var released=[],soon=[];
-  Object.keys(RELINFO).forEach(function(id){
-    var info=RELINFO[id];
+  function chk(id,name,cycle,recentDays,warnDays){
     var obs=(data[id]||[]).filter(function(d){return d.value!=='.'&&!isNaN(parseFloat(d.value));});
     if(!obs.length)return;
-    var last=new Date(obs[0].date);
+    var last=new Date(obs[0].date);last.setHours(0,0,0,0);
     var daysSince=Math.floor((today-last)/86400000);
-    if(info.weekly){
-      if(daysSince<=2)released.push(info.n);
-      else if(daysSince>=5)soon.push({n:info.n,d:7-daysSince});
-      return;
-    }
-    var sameMonth=last.getMonth()===today.getMonth()&&last.getFullYear()===today.getFullYear();
-    if(sameMonth&&daysSince<=3){released.push(info.n);return;}
-    if(!sameMonth){
-      var nm=new Date(today.getFullYear(),today.getMonth(),info.day||15);
-      if(nm<today)nm=new Date(today.getFullYear(),today.getMonth()+1,info.day||15);
-      var du=Math.floor((nm-today)/86400000);
-      if(du>=0&&du<=7)soon.push({n:info.n,d:du});
-    }
-  });
+    if(daysSince<=recentDays){released.push(name);return;}
+    var nextExp=new Date(last);nextExp.setDate(nextExp.getDate()+cycle);
+    var du=Math.floor((nextExp-today)/86400000);
+    if(du>=0&&du<=warnDays)soon.push({n:name,d:du});
+  }
+  Object.keys(REL_MONTHLY).forEach(function(id){chk(id,REL_MONTHLY[id],35,5,7);});
+  Object.keys(REL_WEEKLY).forEach(function(id){chk(id,REL_WEEKLY[id],7,2,3);});
+  Object.keys(REL_QUARTERLY).forEach(function(id){chk(id,REL_QUARTERLY[id],120,7,14);});
   var html='<div class="release-bar">';
-  if(released.length)html+='<span class="rel-chip rel-today">📢 오늘 발표: '+released.join(' · ')+'</span>';
-  soon.forEach(function(s){html+='<span class="rel-chip rel-soon">⏰ '+(s.d===0?'오늘':s.d+'일 후')+' '+s.n+'</span>';});
+  if(released.length)html+='<span class="rel-chip rel-today">📢 최근 발표: '+released.join(' · ')+'</span>';
+  soon.forEach(function(s){html+='<span class="rel-chip rel-soon">⏰ '+(s.d===0?'오늘 예정':s.d+'일 후 예정')+' '+s.n+'</span>';});
   html+='</div>';
-  if(released.length||soon.length)document.getElementById('releaseBanner').innerHTML=html;
+  document.getElementById('releaseBanner').innerHTML=(released.length||soon.length)?html:'';
 }
 
 /* ========== WEEKLY BANNER ========== */
