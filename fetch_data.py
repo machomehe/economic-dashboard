@@ -15,6 +15,8 @@ SERIES_IDS = [
     'CPIAUCSL', 'CPILFESL', 'T10YIE', 'DCOILWTICO',
     # 위험/시장
     'BAMLH0A0HYM2', 'BAMLC0A4CBBB', 'VIXCLS', 'DTWEXBGS', 'M2SL',
+    # 시장지표
+    'SP500', 'NASDAQCOM', 'DEXKOUS',
 ]
 
 def fetch_series(series_id):
