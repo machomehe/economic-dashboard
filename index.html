@@ -68,8 +68,8 @@ h1{font-size:1.3rem;font-weight:700}
 .card-name-link:hover{text-decoration:underline;color:#555}
 
 /* Grid */
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr);gap:6px}}
 
 /* Card */
 .card{border-radius:9px;padding:13px;display:block;color:inherit;position:relative;transition:transform .2s,box-shadow .2s,background .3s,border .3s;border-left:3px solid transparent}
@@ -111,7 +111,7 @@ body.dark .range-track{background:#444}
 .range-min,.range-max{font-size:.5rem;color:#bbb;flex-shrink:0;min-width:20px}
 .range-max{text-align:right}
 body.dark .range-min,body.dark .range-max{color:#666}
-.chart-wrap{height:130px}canvas{max-width:100%}
+.chart-wrap{height:110px}canvas{max-width:100%}@media(max-width:600px){.chart-wrap{height:80px}}
 .save-toast{position:fixed;bottom:20px;right:20px;background:#1a1a1a;color:#fff;padding:8px 16px;border-radius:8px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
 .save-toast.show{opacity:1}
 .card-star::before{content:'★ 핵심';font-size:.52rem;font-weight:700;color:#f39c12;background:rgba(243,156,18,0.12);padding:1px 6px;border-radius:6px;margin-right:5px;vertical-align:middle;}
