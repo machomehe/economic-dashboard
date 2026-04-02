@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>경제 브리핑 - 2026.04.02</title>
+<title>경제 브리핑</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -22,6 +22,15 @@ table.indicators col.col-date{width:18%;}
 table.indicators td:nth-child(4){color:#999;font-size:.65rem;line-height:1.4;}
 /* 접근성: 낮은 대비 색상 개선 (#bbb -> #999, #ccc -> #999) */
 .footer-note{font-size:.62rem;color:#999;text-align:center;padding:20px 0 10px;}
+
+/* 버전 네비게이션 버튼 */
+.ver-btn{
+  padding:4px 10px;border-radius:12px;font-size:.68rem;font-weight:600;
+  border:1px solid #ddd;background:#fff;color:#666;cursor:pointer;
+  transition:all .2s;
+}
+.ver-btn:hover{background:#f5f5f5;border-color:#aaa;}
+.ver-btn.active{background:#222;color:#fff;border-color:#222;}
 
 /* 모바일 반응형 */
 @media(max-width:680px){
@@ -45,299 +54,115 @@ table.indicators td:nth-child(4){color:#999;font-size:.65rem;line-height:1.4;}
 <body>
 <div style="max-width:680px;margin:0 auto;padding:20px;">
 
-  <!-- 1. 헤더 -->
-  <div style="background:#fef2f2;border-left:4px solid #dc2626;border-radius:8px;padding:16px 20px;margin-bottom:20px;">
-    <div style="font-size:.72rem;color:#888;">2026.04.02 (수) &middot; 경제 사이클: 둔화 (스태그플레이션 경고)</div>
-    <div style="font-size:1.25rem;font-weight:700;margin:6px 0;color:#b91c1c;">
-      먹구름 &mdash; 이란 전쟁발 유가 폭등과 고용 충격의 이중고
-    </div>
-    <div style="font-size:.82rem;color:#555;">WTI $105, 비농업고용 -9.2만명, ISM 가격지수 78.3(4년 최고) &rarr; 스태그플레이션 경고 심화</div>
+  <!-- 네비게이션 -->
+  <div id="version-nav" style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+    <span style="font-size:.7rem;color:#888;margin-right:4px;">버전:</span>
+    <!-- JS로 버튼 동적 생성 -->
   </div>
 
-  <!-- 2. 오늘의 주목 신호 -->
-  <div style="margin-bottom:20px;">
-    <div style="font-size:.85rem;font-weight:700;margin-bottom:10px;">&#x1F4CC; 오늘의 주목 신호</div>
-
-    <div style="background:#fef2f2;border-radius:8px;padding:12px 16px;margin-bottom:8px;">
-      <div style="font-weight:700;color:#dc2626;font-size:.82rem;">&#x26A0;&#xFE0F; ISM 가격지수 78.3 급등 &mdash; 2022년 6월 이후 최고</div>
-      <div style="font-size:.78rem;color:#444;margin-top:5px;line-height:1.6;">
-        ISM 제조업 PMI는 52.7로 확장세를 유지했으나, 가격지수가 2개월간 +19.3pp 급등하며 78.3을 기록. 18개 산업 중 17개가 비용 상승 보고. 이란 전쟁발 유가 급등이 원자재 비용을 끌어올리며 기업 마진을 압박. 생산은 늘어도 수익은 줄어드는 스태그플레이션 신호.
-      </div>
-    </div>
-
-    <div style="background:#fef2f2;border-radius:8px;padding:12px 16px;margin-bottom:8px;">
-      <div style="font-weight:700;color:#dc2626;font-size:.82rem;">&#x1F4C9; 2월 비농업고용 -9.2만명 &mdash; 코로나 이후 첫 마이너스</div>
-      <div style="font-size:.78rem;color:#444;margin-top:5px;line-height:1.6;">
-        2월 비농업고용이 전월 +12.6만에서 -9.2만으로 급전환. 실업률도 4.4%로 상승. 3월 ADP도 +6.2만에 그쳐 금요일(4/3) 발표될 고용지표도 부진 예상. 과거 긴축의 시차적 효과(lagged effect)와 지정학적 불확실성이 고용시장을 냉각시키는 중.
-      </div>
-    </div>
-
-    <div style="background:#fff7ed;border-radius:8px;padding:12px 16px;margin-bottom:8px;">
-      <div style="font-weight:700;color:#c2410c;font-size:.82rem;">&#x1F6E2;&#xFE0F; WTI $105 돌파 &mdash; 호르무즈 해협 선박 통행 90% 감소</div>
-      <div style="font-size:.78rem;color:#444;margin-top:5px;line-height:1.6;">
-        이란 전쟁(2/27 발발)으로 글로벌 원유 수송량의 20%가 통과하는 호르무즈 해협이 사실상 봉쇄. WTI는 한 달 만에 $69에서 $105로 52% 급등. EIA는 전쟁 미확산 시 Q3까지 $80 이하로 안정 전망하나, 확전 시 $120 돌파 위험. 에너지 비용 전이가 인플레이션 재점화의 핵심 촉매.
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. 자산군별 투자 전략 매트릭스 -->
-  <div style="margin-bottom:20px;">
-    <div style="font-size:.85rem;font-weight:700;margin-bottom:10px;">&#x1F3AF; 자산군별 투자 전략 매트릭스</div>
-
-    <!-- 매우 유리 -->
-    <div style="background:#dcfce7;border-radius:8px;padding:10px 14px;margin-bottom:6px;">
-      <div style="font-size:.75rem;font-weight:700;color:#166534;margin-bottom:5px;">&#x1F7E2; 매우 유리 &mdash; 비중 확대 권장</div>
-      <div style="font-size:.78rem;color:#333;line-height:1.6;">
-        <b>금</b> &mdash; 달러 약세 + 극단적 공포 + 지정학 리스크 = 안전자산 수요 급증. 실질금리 하락 기대 속 매력도 상승.<br>
-        <b>단기 국채</b> &mdash; 2년물 3.79%, 연준 동결 기조. 낮은 듀레이션 리스크에 매력적 캐리 수익.
-      </div>
-    </div>
-
-    <!-- 유리 -->
-    <div style="background:#fefce8;border-radius:8px;padding:10px 14px;margin-bottom:6px;">
-      <div style="font-size:.75rem;font-weight:700;color:#854d0e;margin-bottom:5px;">&#x1F7E1; 유리 &mdash; 비중 유지</div>
-      <div style="font-size:.78rem;color:#333;line-height:1.6;">
-        <b>방어주(헬스케어, 유틸리티)</b> &mdash; 경기침체 저항력 높은 섹터. 안전선호 수혜, 낮은 베타로 하방 방어.<br>
-        <b>에너지/원자재</b> &mdash; 유가 $105로 전쟁 프리미엄 상당 반영. 추가 상승 여력 있으나 전쟁 종결 시 급락 리스크도 큼. 추격매수보다 보유 유지.<br>
-        <b>달러 현금</b> &mdash; DXY 99.29로 약세이나 신흥국 통화 대비 안정. 원/달러 1,515원으로 한국자산 진입은 신중해야.
-      </div>
-    </div>
-
-    <!-- 중립 -->
-    <div style="background:#f5f5f5;border-radius:8px;padding:10px 14px;margin-bottom:6px;">
-      <div style="font-size:.75rem;font-weight:700;color:#555;margin-bottom:5px;">&#x26AA; 중립 &mdash; 관망 또는 소량 분할매수</div>
-      <div style="font-size:.78rem;color:#333;line-height:1.6;">
-        <b>미국 대형주(S&amp;P 500)</b> &mdash; S&amp;P 6,575에 Fear &amp; Greed 17(극단적 공포). 2025년 F&amp;G 한 자릿수는 훌륭한 매수 기회였음. 눌림목 분할매수는 유효하나 공격적 진입은 시기상조.<br>
-        <b>투자등급 채권</b> &mdash; BBB 스프레드 1.13% 안정적이나 장기물은 인플레이션 지속 시 리스크.
-      </div>
-    </div>
-
-    <!-- 불리 -->
-    <div style="background:#fef2f2;border-radius:8px;padding:10px 14px;margin-bottom:6px;">
-      <div style="font-size:.75rem;font-weight:700;color:#991b1b;margin-bottom:5px;">&#x1F534; 불리 &mdash; 비중 축소 또는 회피</div>
-      <div style="font-size:.78rem;color:#333;line-height:1.6;">
-        <b>고성장/미수익 기술주</b> &mdash; 10년 실질금리 2.0%, Core PCE 3.06%. 고듀레이션 주식은 취약. 나스닥 반등은 불안정.<br>
-        <b>신흥국/한국 주식</b> &mdash; 원화 1,515원(2009년 이후 최약), 원유 수입비용 급증. 한국 물가 2.2%로 한은의 금리 인하 여력 제한.<br>
-        <b>하이일드 채권</b> &mdash; HY 스프레드 3.28% 확대 중. 고용 악화 지속 시 추가 확대 가능.
-      </div>
-    </div>
-
-    <!-- 요약 바 -->
-    <div class="summary-bar" style="display:flex;border-radius:6px;overflow:hidden;height:22px;margin-top:8px;font-size:.6rem;font-weight:700;text-align:center;line-height:22px;">
-      <div style="flex:2;background:#dcfce7;color:#166534;">금 &middot; 단기채</div>
-      <div style="flex:2;background:#fefce8;color:#854d0e;">방어주 &middot; 현금 &middot; 에너지</div>
-      <div style="flex:2;background:#f5f5f5;color:#555;">S&amp;P 500 &middot; IG채권</div>
-      <div style="flex:3;background:#fef2f2;color:#991b1b;">기술주 &middot; 신흥국 &middot; HY</div>
-    </div>
-  </div>
-
-  <!-- 4. 오늘의 투자 시사점 -->
-  <div style="background:#f8f8f8;border-radius:8px;padding:14px 18px;margin-bottom:24px;">
-    <div style="font-size:.85rem;font-weight:700;margin-bottom:8px;">&#x1F4A1; 오늘의 투자 시사점</div>
-    <div style="font-size:.8rem;color:#444;line-height:1.7;">
-      스태그플레이션 신호가 강화되고 있습니다. 제조업 투입비용 급등(ISM 가격지수 78.3)과 고용시장 수축(NFP -9.2만)이 동시에 나타나며 연준은 딜레마에 빠졌습니다 &mdash; Core PCE 3.06%가 금리 인하를 막고, 고용 악화는 완화를 요구하고 있습니다. 이란 전쟁의 원유 공급 차질이 핵심 변수이며, 전쟁 종결 시점이 시장의 방향을 결정할 것입니다. Fear &amp; Greed 17(극단적 공포)은 평시에 역사적 반등 시그널이었으나, 2022년 러-우 전쟁 시에는 극단적 공포 진입 후에도 S&amp;P가 추가 20% 하락한 사례가 있어 전쟁 국면에서는 유보적으로 해석해야 합니다. 단기적으로 원자재·단기채 중심 방어 포지션을 유지하되, 금요일(4/3) 고용지표가 서프라이즈를 보이면 급반등 가능성에 대비하세요.
-    </div>
-    <div style="font-size:.65rem;color:#999;margin-top:10px;">
-      ※ 이 브리핑은 교육 목적이며 투자 조언이 아닙니다.
-    </div>
-  </div>
-
-  <!-- 5. 핵심 지표 일람 -->
-  <div style="margin-bottom:16px;">
-    <div style="font-size:.85rem;font-weight:700;margin-bottom:4px;">&#x1F4CB; 핵심 지표 일람</div>
-
-    <!-- 유동성 -->
-    <div style="font-size:.88rem;font-weight:700;color:#2563eb;margin:24px 0 8px;padding-bottom:4px;border-bottom:2px solid #2563eb;">&#x1F4B0; 유동성</div>
-    <table class="indicators" role="table" aria-label="유동성 지표">
-      <colgroup><col class="col-name"><col class="col-val"><col class="col-desc"><col class="col-date"></colgroup>
-      <tr>
-        <td style="font-weight:600;color:#888;">기준금리</td>
-        <td style="font-weight:700;color:#888;">3.50-3.75%</td>
-        <td style="color:#888;font-size:.7rem;">2회 연속 동결</td>
-        <td>3/19 &middot; 다음 5/7</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">10년 실질금리</td>
-        <td style="font-weight:700;color:#dc2626;">2.00%</td>
-        <td style="color:#dc2626;font-size:.7rem;">높은 수준 유지 &mdash; 성장주 압박</td>
-        <td>3/31 &middot; 매일</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#16a34a;">10년 국채금리</td>
-        <td style="font-weight:700;color:#16a34a;">4.28%</td>
-        <td style="color:#16a34a;font-size:.7rem;">&#x25BC; 3일 연속 하락, 4.38%에서 내림</td>
-        <td>4/1 &middot; 매일</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#16a34a;">M2 통화량</td>
-        <td style="font-weight:700;color:#16a34a;">$22,667B</td>
-        <td style="color:#16a34a;font-size:.7rem;">&#x25B2; 증가 중 &mdash; 유동성 확대</td>
-        <td>2/1 &middot; 다음 4/22</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">연준 자산(WALCL)</td>
-        <td style="font-weight:700;color:#dc2626;">$6.657T</td>
-        <td style="color:#dc2626;font-size:.7rem;">&#x25BC; QT 지속 &mdash; 유동성 위축</td>
-        <td>3/25 &middot; 매주</td>
-      </tr>
-    </table>
-
-    <!-- 성장 -->
-    <div style="font-size:.88rem;font-weight:700;color:#16a34a;margin:24px 0 8px;padding-bottom:4px;border-bottom:2px solid #16a34a;">&#x1F4C8; 성장</div>
-    <table class="indicators" role="table" aria-label="성장 지표">
-      <colgroup><col class="col-name"><col class="col-val"><col class="col-desc"><col class="col-date"></colgroup>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">실질GDP</td>
-        <td style="font-weight:700;color:#dc2626;">0.7%</td>
-        <td style="color:#dc2626;font-size:.7rem;">Q4 2025 &mdash; 급격한 둔화</td>
-        <td>Q4 &middot; 다음 4/30</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#888;">ISM 제조업 PMI</td>
-        <td style="font-weight:700;color:#888;">52.7</td>
-        <td style="color:#888;font-size:.7rem;">&#x25B2; 확장 중이나 가격지수 78.3 급등 — 주의</td>
-        <td>4/1 &middot; 다음 5/1</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">비농업고용(NFP)</td>
-        <td style="font-weight:700;color:#dc2626;">-9.2만</td>
-        <td style="color:#dc2626;font-size:.7rem;">&#x25BC; 코로나 이후 첫 마이너스</td>
-        <td>3/7 &middot; 다음 4/3 &middot; +13.3만e</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">실업률</td>
-        <td style="font-weight:700;color:#dc2626;">4.4%</td>
-        <td style="color:#dc2626;font-size:.7rem;">&#x25B2; 상승 중 &mdash; 위험구간 접근</td>
-        <td>3/7 &middot; 다음 4/3</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#16a34a;">주간실업수당</td>
-        <td style="font-weight:700;color:#16a34a;">21.0만</td>
-        <td style="color:#16a34a;font-size:.7rem;">역사적 저수준이나 NFP와 괴리 — 채용동결(hiring freeze) 가능성</td>
-        <td>3/27 &middot; 매주</td>
-      </tr>
-    </table>
-
-    <!-- 인플레이션 -->
-    <div style="font-size:.88rem;font-weight:700;color:#ea580c;margin:24px 0 8px;padding-bottom:4px;border-bottom:2px solid #ea580c;">&#x1F525; 인플레이션</div>
-    <table class="indicators" role="table" aria-label="인플레이션 지표">
-      <colgroup><col class="col-name"><col class="col-val"><col class="col-desc"><col class="col-date"></colgroup>
-      <tr>
-        <td style="font-weight:600;color:#16a34a;">CPI</td>
-        <td style="font-weight:700;color:#16a34a;">2.4% YoY</td>
-        <td style="color:#16a34a;font-size:.7rem;">안정 &mdash; 유가 급등 이전 데이터(2월), 4월 발표에 반영 예정</td>
-        <td>3/12 &middot; 다음 4/10</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#16a34a;">Core CPI</td>
-        <td style="font-weight:700;color:#16a34a;">2.5% YoY</td>
-        <td style="color:#16a34a;font-size:.7rem;">&#x25BC; 2021년 3월 이후 최저</td>
-        <td>3/12 &middot; 다음 4/10</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">Core PCE</td>
-        <td style="font-weight:700;color:#dc2626;">3.06% YoY</td>
-        <td style="color:#dc2626;font-size:.7rem;">&#x25B2; 연준 목표 2% 크게 상회</td>
-        <td>3/13 &middot; 다음 4/9</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#888;">기대인플레(10Y BEI)</td>
-        <td style="font-weight:700;color:#888;">2.31%</td>
-        <td style="color:#888;font-size:.7rem;">목표 근처 안정</td>
-        <td>4/1 &middot; 매일</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">WTI 유가</td>
-        <td style="font-weight:700;color:#dc2626;">$104.69</td>
-        <td style="color:#dc2626;font-size:.7rem;">&#x25B2; 1개월간 +52% &mdash; 이란/호르무즈 위기</td>
-        <td>3/30 &middot; 매일</td>
-      </tr>
-    </table>
-
-    <!-- 위험 -->
-    <div style="font-size:.88rem;font-weight:700;color:#dc2626;margin:24px 0 8px;padding-bottom:4px;border-bottom:2px solid #dc2626;">&#x26A0;&#xFE0F; 위험</div>
-    <table class="indicators" role="table" aria-label="위험 지표">
-      <colgroup><col class="col-name"><col class="col-val"><col class="col-desc"><col class="col-date"></colgroup>
-      <tr>
-        <td style="font-weight:600;color:#16a34a;">장단기 금리차(10Y-2Y)</td>
-        <td style="font-weight:700;color:#16a34a;">+0.52%</td>
-        <td style="color:#16a34a;font-size:.7rem;">정상 기울기 &mdash; 역전 아님</td>
-        <td>4/1 &middot; 매일</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">하이일드 스프레드</td>
-        <td style="font-weight:700;color:#dc2626;">3.28%</td>
-        <td style="color:#dc2626;font-size:.7rem;">&#x25B2; 확대 중 &mdash; 신용 스트레스 상승</td>
-        <td>3/31 &middot; 매일</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#888;">BBB 스프레드</td>
-        <td style="font-weight:700;color:#888;">1.13%</td>
-        <td style="color:#888;font-size:.7rem;">안정 &mdash; IG 신용 양호</td>
-        <td>3/31 &middot; 매일</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#16a34a;">금융스트레스지수</td>
-        <td style="font-weight:700;color:#16a34a;">-0.18</td>
-        <td style="color:#16a34a;font-size:.7rem;">마이너스 = 시스템 리스크 낮음</td>
-        <td>3/27 &middot; 매주</td>
-      </tr>
-    </table>
-
-    <!-- 시장심리 -->
-    <div style="font-size:.88rem;font-weight:700;color:#7c3aed;margin:24px 0 8px;padding-bottom:4px;border-bottom:2px solid #7c3aed;">&#x1F9E0; 시장심리</div>
-    <table class="indicators" role="table" aria-label="시장심리 지표">
-      <colgroup><col class="col-name"><col class="col-val"><col class="col-desc"><col class="col-date"></colgroup>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">VIX</td>
-        <td style="font-weight:700;color:#dc2626;">24.55</td>
-        <td style="color:#dc2626;font-size:.7rem;">높지만 하락 중 &mdash; 3월 고점 35.3 대비 개선</td>
-        <td>4/1 &middot; 매일</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#16a34a;">달러인덱스(DXY)</td>
-        <td style="font-weight:700;color:#16a34a;">99.29</td>
-        <td style="color:#16a34a;font-size:.7rem;">&#x25BC; 약세 &mdash; 신흥국/원자재에 긍정</td>
-        <td>4/1 &middot; 매일</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">Fear &amp; Greed 지수</td>
-        <td style="font-weight:700;color:#dc2626;">17</td>
-        <td style="color:#dc2626;font-size:.7rem;">극단적 공포 &mdash; 역사적 반등 시그널</td>
-        <td>4/1 &middot; 매일</td>
-      </tr>
-    </table>
-
-    <!-- 시장지표 -->
-    <div style="font-size:.88rem;font-weight:700;color:#0891b2;margin:24px 0 8px;padding-bottom:4px;border-bottom:2px solid #0891b2;">&#x1F4CA; 시장지표</div>
-    <table class="indicators" role="table" aria-label="시장지표">
-      <colgroup><col class="col-name"><col class="col-val"><col class="col-desc"><col class="col-date"></colgroup>
-      <tr>
-        <td style="font-weight:600;color:#16a34a;">S&amp;P 500</td>
-        <td style="font-weight:700;color:#16a34a;">6,575</td>
-        <td style="color:#16a34a;font-size:.7rem;">&#x25B2; +0.72% &mdash; 안도 반등</td>
-        <td>4/1 &middot; 매일</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#16a34a;">NASDAQ</td>
-        <td style="font-weight:700;color:#16a34a;">21,841</td>
-        <td style="color:#16a34a;font-size:.7rem;">&#x25B2; +1.16% &mdash; 기술주 반등</td>
-        <td>4/1 &middot; 매일</td>
-      </tr>
-      <tr>
-        <td style="font-weight:600;color:#dc2626;">원/달러</td>
-        <td style="font-weight:700;color:#dc2626;">1,515원</td>
-        <td style="color:#dc2626;font-size:.7rem;">&#x25B2; 2009년 이후 원화 최약 &mdash; 위험회피</td>
-        <td>4/2 &middot; 매일</td>
-      </tr>
-    </table>
-
-  </div>
-
-  <div style="font-size:.62rem;color:#999;text-align:center;padding:20px 0 10px;">
-    데이터: FRED, Trading Economics, CNN, BLS, BEA &middot; 업데이트 2026.04.02
+  <!-- 콘텐츠 영역 -->
+  <div id="briefing-content">
+    <!-- fallback: 기본 브리핑 콘텐츠 (JS 로드 실패 시 표시) -->
   </div>
 
 </div>
+
+<script>
+(function(){
+  var navEl = document.getElementById('version-nav');
+  var contentEl = document.getElementById('briefing-content');
+  var versions = [];
+  var currentDate = null;
+
+  // 브리핑 HTML을 fetch하여 콘텐츠 영역에 삽입
+  function loadBriefing(date, file) {
+    currentDate = date;
+    // 활성 버튼 업데이트
+    var btns = navEl.querySelectorAll('.ver-btn');
+    btns.forEach(function(btn) {
+      if (btn.dataset.date === date) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+    // URL hash 업데이트
+    history.replaceState(null, '', '#' + date);
+    // fetch 브리핑
+    fetch(file)
+      .then(function(res) {
+        if (!res.ok) throw new Error('로드 실패');
+        return res.text();
+      })
+      .then(function(html) {
+        contentEl.innerHTML = html;
+      })
+      .catch(function() {
+        contentEl.innerHTML = '<div style="padding:40px 0;text-align:center;color:#999;font-size:.82rem;">브리핑을 불러올 수 없습니다.</div>';
+      });
+  }
+
+  // 네비게이션 버튼 렌더링
+  function renderNav(versions) {
+    // 최근 5개만 표시 (오래된 순 -> 최신 순, 최신이 오른쪽)
+    var recent = versions.slice(-5);
+    recent.forEach(function(v) {
+      var btn = document.createElement('button');
+      btn.className = 'ver-btn';
+      btn.textContent = v.label;
+      btn.dataset.date = v.date;
+      btn.addEventListener('click', function() {
+        loadBriefing(v.date, v.file);
+      });
+      navEl.appendChild(btn);
+    });
+  }
+
+  // 초기화
+  fetch('versions.json')
+    .then(function(res) {
+      if (!res.ok) throw new Error('versions.json 로드 실패');
+      return res.json();
+    })
+    .then(function(data) {
+      versions = data.versions || [];
+      if (versions.length === 0) return;
+      renderNav(versions);
+
+      // URL hash에서 버전 결정
+      var hash = location.hash.replace('#', '');
+      var target = null;
+      if (hash) {
+        target = versions.find(function(v) { return v.date === hash; });
+      }
+      // hash가 없거나 유효하지 않으면 최신 버전 로드
+      if (!target) {
+        target = versions[versions.length - 1];
+      }
+      loadBriefing(target.date, target.file);
+    })
+    .catch(function() {
+      // versions.json 로드 실패 시 네비게이션 숨기고 fallback 브리핑 직접 로드 시도
+      navEl.style.display = 'none';
+      fetch('briefings/260402.html')
+        .then(function(res) { return res.ok ? res.text() : Promise.reject(); })
+        .then(function(html) { contentEl.innerHTML = html; })
+        .catch(function() {
+          contentEl.innerHTML = '<div style="padding:40px 0;text-align:center;color:#999;font-size:.82rem;">브리핑을 불러올 수 없습니다.</div>';
+        });
+    });
+
+  // 브라우저 뒤로/앞으로 시 hash 변경 감지
+  window.addEventListener('hashchange', function() {
+    var hash = location.hash.replace('#', '');
+    if (hash && hash !== currentDate) {
+      var target = versions.find(function(v) { return v.date === hash; });
+      if (target) {
+        loadBriefing(target.date, target.file);
+      }
+    }
+  });
+})();
+</script>
 </body>
 </html>
