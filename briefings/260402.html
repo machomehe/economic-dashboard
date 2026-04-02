@@ -1,6 +1,6 @@
   <!-- 1. 헤더 -->
   <div style="background:#fef2f2;border-left:4px solid #dc2626;border-radius:8px;padding:16px 20px;margin-bottom:20px;">
-    <div style="font-size:.72rem;color:#888;">2026.04.02 (수) &middot; 경제 사이클: 둔화 (스태그플레이션 경고)</div>
+    <div style="font-size:.72rem;color:#888;">2026.04.02 (수) 09:55 KST &middot; 프롬프트 v2 &middot; 경제 사이클: 둔화 (스태그플레이션 경고)</div>
     <div style="font-size:1.25rem;font-weight:700;margin:6px 0;color:#b91c1c;">
       먹구름 &mdash; 이란 전쟁발 유가 폭등과 고용 충격의 이중고
     </div>
@@ -32,6 +32,245 @@
       </div>
     </div>
   </div>
+
+  <!-- 2.5 주요 지표 차트 -->
+  <div style="margin-bottom:20px;">
+    <div style="font-size:.85rem;font-weight:700;margin-bottom:12px;">&#x1F4CA; 주요 지표 추이</div>
+
+    <!-- WTI 유가 추이 -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">WTI 유가 추이</div>
+      <canvas id="chart-wti-260402" style="width:100%;height:180px;"></canvas>
+    </div>
+
+    <!-- VIX 공포지수 추이 -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">VIX 공포지수 추이</div>
+      <canvas id="chart-vix-260402" style="width:100%;height:160px;"></canvas>
+    </div>
+
+    <!-- 주요 지수 변동률 -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">주요 지수 변동률</div>
+      <canvas id="chart-indices-260402" style="width:100%;height:120px;"></canvas>
+    </div>
+
+    <!-- 금리 구조 -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">금리 구조 (10년 vs 2년 국채)</div>
+      <canvas id="chart-rates-260402" style="width:100%;height:160px;"></canvas>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    var chartDefaults = {
+      font: { family: "'Pretendard Variable',Inter,-apple-system,system-ui,sans-serif" }
+    };
+
+    fetch('data.json').then(function(r){return r.json();}).then(function(data){
+      var d = data.data;
+
+      // 유틸: 시계열에서 "." 제외, 오름차순 정렬, 최근 N일
+      function prep(series, n) {
+        var filtered = series.filter(function(o){ return o.value !== '.'; });
+        filtered.sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+        return filtered.slice(-n);
+      }
+
+      function fmtDate(dateStr) {
+        return dateStr.slice(5); // "MM-DD"
+      }
+
+      // ── 1. WTI 유가 ──
+      var wti = prep(d.DCOILWTICO, 30);
+      new Chart(document.getElementById('chart-wti-260402'), {
+        type: 'line',
+        data: {
+          labels: wti.map(function(o){return fmtDate(o.date);}),
+          datasets: [{
+            label: 'WTI ($)',
+            data: wti.map(function(o){return parseFloat(o.value);}),
+            borderColor: '#dc2626',
+            backgroundColor: 'rgba(220,38,38,0.08)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: function(ctx){ return '$' + ctx.parsed.y.toFixed(2); } } }
+          },
+          scales: {
+            x: { ticks: { font: { size: 10, family: chartDefaults.font.family }, maxTicksLimit: 6 }, grid: { display: false } },
+            y: { ticks: { font: { size: 10, family: chartDefaults.font.family }, callback: function(v){ return '$'+v; } }, grid: { color: '#f0f0f0' } }
+          }
+        }
+      });
+
+      // ── 2. VIX ──
+      var vix = prep(d.VIXCLS, 30);
+      new Chart(document.getElementById('chart-vix-260402'), {
+        type: 'line',
+        data: {
+          labels: vix.map(function(o){return fmtDate(o.date);}),
+          datasets: [{
+            label: 'VIX',
+            data: vix.map(function(o){return parseFloat(o.value);}),
+            borderColor: '#7c3aed',
+            backgroundColor: 'rgba(124,58,237,0.10)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            borderWidth: 2
+          }]
+        },
+        plugins: [{
+          id: 'vixBaseline',
+          afterDraw: function(chart) {
+            var yScale = chart.scales.y;
+            var xScale = chart.scales.x;
+            var y = yScale.getPixelForValue(20);
+            if (y >= yScale.top && y <= yScale.bottom) {
+              var ctx = chart.ctx;
+              ctx.save();
+              ctx.setLineDash([4, 4]);
+              ctx.strokeStyle = '#a78bfa';
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(xScale.left, y);
+              ctx.lineTo(xScale.right, y);
+              ctx.stroke();
+              ctx.fillStyle = '#a78bfa';
+              ctx.font = '10px Pretendard Variable, sans-serif';
+              ctx.fillText('기준선 20', xScale.right - 52, y - 4);
+              ctx.restore();
+            }
+          }
+        }],
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { font: { size: 10, family: chartDefaults.font.family }, maxTicksLimit: 6 }, grid: { display: false } },
+            y: { ticks: { font: { size: 10, family: chartDefaults.font.family } }, grid: { color: '#f0f0f0' } }
+          }
+        }
+      });
+
+      // ── 3. 주요 지수 변동률 (가로 막대) ──
+      var sp = prep(d.SP500, 30);
+      var nq = prep(d.NASDAQCOM, 30);
+      var krw = prep(d.DEXKOUS, 30);
+
+      function pctChange(arr) {
+        if (arr.length < 2) return 0;
+        var first = parseFloat(arr[0].value);
+        var last = parseFloat(arr[arr.length - 1].value);
+        return ((last - first) / first * 100);
+      }
+      var spPct = pctChange(sp);
+      var nqPct = pctChange(nq);
+      var krwPct = pctChange(krw);
+      // 원/달러는 상승=부정
+      var barColors = [
+        spPct >= 0 ? '#16a34a' : '#dc2626',
+        nqPct >= 0 ? '#16a34a' : '#dc2626',
+        krwPct <= 0 ? '#16a34a' : '#dc2626'
+      ];
+
+      new Chart(document.getElementById('chart-indices-260402'), {
+        type: 'bar',
+        data: {
+          labels: ['S&P 500', 'NASDAQ', '원/달러'],
+          datasets: [{
+            label: '변동률 (%)',
+            data: [spPct, nqPct, krwPct].map(function(v){return parseFloat(v.toFixed(2));}),
+            backgroundColor: barColors,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: function(ctx){ return ctx.parsed.x.toFixed(2) + '%'; } } }
+          },
+          scales: {
+            x: { ticks: { font: { size: 10, family: chartDefaults.font.family }, callback: function(v){ return v+'%'; } }, grid: { color: '#f0f0f0' } },
+            y: { ticks: { font: { size: 11, family: chartDefaults.font.family } }, grid: { display: false } }
+          }
+        }
+      });
+
+      // ── 4. 금리 구조 ──
+      var g10 = prep(d.DGS10, 30);
+      var g2 = prep(d.DGS2, 30);
+      // 날짜 기준으로 매칭
+      var dateSet = {};
+      g10.forEach(function(o){ dateSet[o.date] = { d10: parseFloat(o.value) }; });
+      g2.forEach(function(o){
+        if (!dateSet[o.date]) dateSet[o.date] = {};
+        dateSet[o.date].d2 = parseFloat(o.value);
+      });
+      var rateDates = Object.keys(dateSet).filter(function(dt){
+        return dateSet[dt].d10 !== undefined && dateSet[dt].d2 !== undefined;
+      }).sort();
+      var d10Vals = rateDates.map(function(dt){ return dateSet[dt].d10; });
+      var d2Vals = rateDates.map(function(dt){ return dateSet[dt].d2; });
+
+      new Chart(document.getElementById('chart-rates-260402'), {
+        type: 'line',
+        data: {
+          labels: rateDates.map(function(dt){ return fmtDate(dt); }),
+          datasets: [
+            {
+              label: '10년 국채',
+              data: d10Vals,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37,99,235,0.06)',
+              fill: '+1',
+              tension: 0.3,
+              pointRadius: 0,
+              borderWidth: 2
+            },
+            {
+              label: '2년 국채',
+              data: d2Vals,
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245,158,11,0.06)',
+              fill: false,
+              tension: 0.3,
+              pointRadius: 0,
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { font: { size: 10, family: chartDefaults.font.family }, boxWidth: 12, padding: 8 }, position: 'top' },
+            tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + '%'; } } }
+          },
+          scales: {
+            x: { ticks: { font: { size: 10, family: chartDefaults.font.family }, maxTicksLimit: 6 }, grid: { display: false } },
+            y: { ticks: { font: { size: 10, family: chartDefaults.font.family }, callback: function(v){ return v+'%'; } }, grid: { color: '#f0f0f0' } }
+          }
+        }
+      });
+
+    });
+  })();
+  </script>
 
   <!-- 3. 자산군별 투자 전략 매트릭스 -->
   <div style="margin-bottom:20px;">
